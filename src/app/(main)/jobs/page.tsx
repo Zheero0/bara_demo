@@ -282,16 +282,16 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         <CardContent className="pt-6 space-y-6">
             <div className="space-y-4">
               <h3 className="font-semibold text-base font-headline">Job Details</h3>
-              <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg space-y-3">
                   <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-2 text-primary" />
+                      <DollarSign className="w-4 h-4 mr-2 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
                           <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
                       </div>
                   </div>
                   <div className="flex items-center">
-                      <Briefcase className="w-4 h-4 mr-2 text-primary" />
+                      <Briefcase className="w-4 h-4 mr-2 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Category</p>
                           <p className="font-semibold text-sm">{job.category}</p>
@@ -299,7 +299,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                   </div>
                   {job.createdAt && (
                       <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-2 text-primary" />
+                          <Calendar className="w-4 h-4 mr-2 text-primary shrink-0" />
                           <div>
                               <p className="text-xs text-muted-foreground">Date Posted</p>
                               <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
@@ -386,7 +386,7 @@ function JobsContent() {
         <div className={cn("md:col-span-4 flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                <h1 className="text-xl font-headline font-bold">Job Marketplace</h1>
+                <h1 className="text-xl font-headline font-bold">Job Search</h1>
                 <p className="text-sm text-muted-foreground">Find your next project.</p>
                 </div>
                 <div className="flex-shrink-0 md:self-end">
