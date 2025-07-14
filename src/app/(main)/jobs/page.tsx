@@ -220,9 +220,9 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
-            const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
             const newConversationRef = doc(collection(db, 'conversations'));
-            
+            const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
+
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
@@ -273,13 +273,12 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                     </CardDescription>
                 </div>
             </div>
-             <Badge variant="secondary" className="px-2 py-1 text-xs">{job.category}</Badge>
           </div>
         </CardHeader>
         <Separator />
         <CardContent className="pt-6 space-y-6">
             <div className="space-y-4">
-              <h3 className="font-semibold text-lg font-headline">Job Details</h3>
+              <h3 className="font-semibold text-base font-headline">Job Details</h3>
               <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
                   <div className="flex items-center">
                       <DollarSign className="w-4 h-4 mr-2 text-primary" />
@@ -467,7 +466,3 @@ export default function JobsPage() {
     </Suspense>
   )
 }
-
-    
-
-    
