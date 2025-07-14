@@ -431,7 +431,7 @@ function JobsContent() {
                                 className={`cursor-pointer transition-all ${selectedJob?.id === job.id ? 'border-primary' : ''}`}
                                 onClick={() => handleJobSelect(job)}
                             >
-                                <CardHeader>
+                                <CardHeader className="p-4">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <CardTitle className="font-headline text-base mb-1 line-clamp-1">{job.title}</CardTitle>
@@ -442,12 +442,12 @@ function JobsContent() {
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent>
-                                    <div className="flex justify-between items-center">
-                                         <p className="text-sm text-muted-foreground line-clamp-2">
+                                <CardContent className="p-4 pt-0">
+                                    <div className="flex justify-between items-start">
+                                         <p className="text-sm text-muted-foreground line-clamp-2 pr-4">
                                             {job.description}
                                         </p>
-                                        <div className="text-lg font-bold text-primary whitespace-nowrap ml-4">${job.price.toLocaleString()}</div>
+                                        <div className="text-lg font-bold text-primary whitespace-nowrap">${job.price.toLocaleString()}</div>
                                     </div>
                                 </CardContent>
                             </Card>
