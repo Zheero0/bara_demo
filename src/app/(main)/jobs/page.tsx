@@ -490,7 +490,7 @@ function JobsContent() {
           job.description.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
       const matchesLocation = locationFilter 
-        ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
+        ? job.location && job.location.toLowerCase().includes(locationFilter.toLowerCase())
         : true;
       const matchesCategory = categoryFilter !== 'All Categories'
         ? job.category === categoryFilter
