@@ -200,7 +200,6 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
     
     try {
         const conversationsRef = collection(db, 'conversations');
-        // A more reliable way is to check for a conversation that includes both users for this specific job.
         const q = query(conversationsRef, 
             where('jobId', '==', job.id),
             where('participantIds', 'array-contains', user.uid)
