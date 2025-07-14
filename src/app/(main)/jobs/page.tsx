@@ -113,6 +113,19 @@ const JOB_CATEGORIES = [
     "Other"
 ];
 
+const getStatusBadgeClass = (status: Job['status']) => {
+    switch (status) {
+        case 'Open':
+            return 'bg-green-600';
+        case 'In Progress':
+            return 'bg-yellow-500';
+        case 'Completed':
+            return 'bg-gray-500';
+        default:
+            return 'bg-muted';
+    }
+}
+
 function LocationCombobox({ value, onChange }: { value: string, onChange: (value: string) => void }) {
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
@@ -583,7 +596,10 @@ function JobDetailView({ job, onBack, onManage, onDelete }: { job: Job, onBack: 
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="min-w-0 flex-1">
-                    <CardTitle className="text-xl font-headline break-words">{job.title}</CardTitle>
+                    <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-xl font-headline break-words">{job.title}</CardTitle>
+                        <Badge variant={'default'} className={cn(getStatusBadgeClass(job.status))}>{job.status}</Badge>
+                    </div>
                     <CardDescription className="mt-1">
                         <div className="flex items-center gap-2 text-xs">
                             <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
@@ -804,20 +820,6 @@ function JobsContent() {
     setPriceFilter('All Prices');
     setJobTypeFilter('All Types');
   };
-
-  const getStatusBadgeClass = (status: Job['status']) => {
-    switch (status) {
-        case 'Open':
-            return 'bg-green-600';
-        case 'In Progress':
-            return 'bg-yellow-500';
-        case 'Completed':
-            return 'bg-gray-500';
-        default:
-            return 'bg-muted';
-    }
-  }
-
 
   return (
     <>
