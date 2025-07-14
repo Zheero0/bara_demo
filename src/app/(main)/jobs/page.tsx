@@ -23,7 +23,7 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState, useMemo, Suspense } from "react"
-import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc, getDoc as getFirestoreDoc } from "firebase/firestore"
+import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc, getDoc as getFirestoreDoc, deleteDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -35,6 +35,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import {
   Command,
   CommandEmpty,
@@ -61,12 +71,13 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown, RotateCcw, SlidersHorizontal } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown, RotateCcw, SlidersHorizontal, Trash2 } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu"
 import { format } from "date-fns"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -322,10 +333,9 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
   );
 }
 
-function ManageJobDialog({ job }: { job: Job }) {
+function ManageJobDialog({ job, onOpenChange }: { job: Job, onOpenChange: (open: boolean) => void }) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof manageJobSchema>>({
     resolver: zodResolver(manageJobSchema),
@@ -340,7 +350,7 @@ function ManageJobDialog({ job }: { job: Job }) {
       const jobRef = doc(db, "jobs", job.id);
       await updateDoc(jobRef, values);
       toast({ title: "Job Updated!", description: "Your job details have been saved." });
-      setIsDialogOpen(false);
+      onOpenChange(false); // Close dialog on success
     } catch (error) {
       console.error("Error updating job: ", error);
       toast({ title: "Error", description: "There was an error updating your job.", variant: "destructive" });
@@ -348,16 +358,15 @@ function ManageJobDialog({ job }: { job: Job }) {
       setLoading(false);
     }
   }
+  
+  // Use `useEffect` to reset the form if the job prop changes
+  useEffect(() => {
+    form.reset(job);
+  }, [job, form]);
+
 
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            <Settings className="mr-2 h-4 w-4" />
-            Manage Job
-        </DropdownMenuItem>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+    <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Manage Job</DialogTitle>
           <DialogDescription>
@@ -491,11 +500,10 @@ function ManageJobDialog({ job }: { job: Job }) {
           </form>
         </Form>
       </DialogContent>
-    </Dialog>
   );
 }
 
-function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
+function JobDetailView({ job, onBack, onManage, onDelete }: { job: Job, onBack: () => void, onManage: (job: Job) => void, onDelete: (jobId: string) => void }) {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -602,7 +610,19 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                             Go to user's profile
                         </Link>
                     </DropdownMenuItem>
-                    {!isJobPoster && (
+                    {isJobPoster ? (
+                        <>
+                           <DropdownMenuSeparator />
+                           <DropdownMenuItem onSelect={() => onManage(job)}>
+                               <Settings className="mr-2 h-4 w-4" />
+                               Manage Job
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onSelect={() => onDelete(job.id)} className="text-destructive">
+                               <Trash2 className="mr-2 h-4 w-4" />
+                               Delete Job
+                           </DropdownMenuItem>
+                        </>
+                    ) : (
                          <DropdownMenuItem>
                             <Flag className="mr-2 h-4 w-4" />
                             Report Job
@@ -678,6 +698,7 @@ function EmptyJobView() {
 
 function JobsContent() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -688,7 +709,9 @@ function JobsContent() {
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isManageDialogOpen, setIsManageDialogOpen] = useState(false);
+  const [jobToManage, setJobToManage] = useState<Job | null>(null);
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -747,6 +770,28 @@ function JobsContent() {
       setMobileView('detail');
   }
 
+  const handleManageJob = (job: Job) => {
+    setJobToManage(job);
+    setIsManageDialogOpen(true);
+  }
+
+  const handleDeleteJob = async () => {
+    if (!jobToDelete) return;
+    try {
+      await deleteDoc(doc(db, "jobs", jobToDelete));
+      toast({ title: "Job Deleted", description: "The job posting has been removed." });
+      setJobToDelete(null); // Close the dialog
+      // If the deleted job was the selected one, clear the selection
+      if (selectedJob?.id === jobToDelete) {
+        setSelectedJob(null);
+      }
+    } catch (error) {
+      console.error("Error deleting job: ", error);
+      toast({ title: "Error", description: "Could not delete the job. Please try again.", variant: "destructive" });
+    }
+  };
+
+
   const truncateText = (text: string, maxLength: number) => {
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + '...';
@@ -775,6 +820,7 @@ function JobsContent() {
 
 
   return (
+    <>
     <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
         <div className={cn("md:col-span-4 flex flex-col gap-4 min-h-0", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
@@ -784,7 +830,7 @@ function JobsContent() {
                 <p className="text-sm text-muted-foreground">Find your next project.</p>
                 </div>
                 <div className="flex-shrink-0">
-                    <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
+                    <PostJobDialog onJobPosted={() => {}} />
                 </div>
             </div>
             <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen} className="border shadow-sm rounded-lg">
@@ -884,7 +930,16 @@ function JobsContent() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                                 {user?.uid === job.postedBy.uid ? (
-                                                   <ManageJobDialog job={job} />
+                                                    <>
+                                                        <DropdownMenuItem onSelect={() => handleManageJob(job)}>
+                                                            <Settings className="mr-2 h-4 w-4" />
+                                                            Manage Job
+                                                        </DropdownMenuItem>
+                                                         <DropdownMenuItem onSelect={() => setJobToDelete(job.id)} className="text-destructive">
+                                                            <Trash2 className="mr-2 h-4 w-4" />
+                                                            Delete Job
+                                                        </DropdownMenuItem>
+                                                    </>
                                                 ) : (
                                                     <DropdownMenuItem>
                                                         <Flag className="mr-2 h-4 w-4" />
@@ -914,14 +969,43 @@ function JobsContent() {
             {loading ? (
                 <Card><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
             ) : selectedJob ? (
-                <JobDetailView job={selectedJob} onBack={() => setMobileView('list')} />
+                <JobDetailView 
+                    job={selectedJob} 
+                    onBack={() => setMobileView('list')}
+                    onManage={handleManageJob}
+                    onDelete={(jobId) => setJobToDelete(jobId)}
+                />
             ) : filteredJobs.length > 0 ? (
-                 <JobDetailView job={filteredJobs[0]} onBack={() => setMobileView('list')} />
+                 <JobDetailView 
+                    job={filteredJobs[0]} 
+                    onBack={() => setMobileView('list')} 
+                    onManage={handleManageJob}
+                    onDelete={(jobId) => setJobToDelete(jobId)}
+                />
             ) : (
                 <EmptyJobView />
             )}
         </div>
     </div>
+    <Dialog open={isManageDialogOpen} onOpenChange={setIsManageDialogOpen}>
+        {jobToManage && <ManageJobDialog job={jobToManage} onOpenChange={setIsManageDialogOpen} />}
+    </Dialog>
+     <AlertDialog open={!!jobToDelete} onOpenChange={(open) => !open && setJobToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this job
+              posting.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteJob} className={cn(buttonVariants({ variant: "destructive" }))}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
 
@@ -932,3 +1016,5 @@ export default function JobsPage() {
     </Suspense>
   )
 }
+
+    
