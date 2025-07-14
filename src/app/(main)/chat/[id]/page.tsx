@@ -5,28 +5,33 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { type User, type Message, type Job } from "@/lib/data"
-import { SendHorizonal, ArrowLeft } from "lucide-react"
+import { type User, type Message } from "@/lib/data"
+import { SendHorizonal, ArrowLeft, MoreHorizontal, Trash2, Flag } from "lucide-react"
 import { useRouter, useParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { db } from "@/lib/firebase";
-import { doc, getDoc, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, updateDoc } from "firebase/firestore";
+import { doc, getDoc, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, updateDoc, deleteDoc } from "firebase/firestore";
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function ConversationPage() {
     const router = useRouter();
     const params = useParams();
     const conversationId = Array.isArray(params.id) ? params.id[0] : params.id;
-    const { user } = useAuth();
+    const { user, profile } = useAuth();
     const { toast } = useToast();
 
     const [conversation, setConversation] = useState<any | null>(null);
     const [otherUser, setOtherUser] = useState<any | null>(null);
-    const [job, setJob] = useState<Job | null>(null);
+    const [job, setJob] = useState<any | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
     const [loading, setLoading] = useState(true);
@@ -62,7 +67,7 @@ export default function ConversationPage() {
                             setOtherUser({ id: userDocSnap.id, ...userDocSnap.data() });
                         }
                         if (jobDocSnap.exists()) {
-                            setJob({ id: jobDocSnap.id, ...jobDocSnap.data() } as Job);
+                            setJob({ id: jobDocSnap.id, ...jobDocSnap.data() });
                         }
 
                     } catch (error) {
@@ -122,9 +127,30 @@ export default function ConversationPage() {
         setNewMessage("");
     };
 
+    const handleDeleteMessage = async (messageId: string) => {
+        if (!conversationId || !messageId) return;
+        try {
+            const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+            await deleteDoc(messageRef);
+            toast({ title: "Message Deleted", description: "The message has been successfully removed." });
+        } catch (error) {
+            console.error("Error deleting message: ", error);
+            toast({ title: "Error", description: "Could not delete the message.", variant: "destructive" });
+        }
+    };
+
+    const handleReportMessage = (messageId: string) => {
+        console.log(`Reporting message ${messageId}`);
+        // In a real app, you would write this report to a "reports" collection in Firestore.
+        toast({
+            title: "Message Reported",
+            description: "Thank you for your feedback. We will review this message.",
+        });
+    };
+
     if (loading) {
         return (
-             <Card className="flex-1 flex flex-col">
+             <Card className="flex-1 flex flex-col h-full">
                 <CardHeader className="flex flex-row items-center gap-4 p-4 border-b">
                      <Button variant="ghost" size="icon" onClick={() => router.push('/chat')}>
                         <ArrowLeft className="w-5 h-5" />
@@ -160,7 +186,7 @@ export default function ConversationPage() {
 
   return (
     <Card className="flex flex-col h-full">
-      <CardHeader className="flex flex-row items-center gap-4 p-4 border-b bg-background">
+      <CardHeader className="flex shrink-0 flex-row items-center gap-4 p-4 border-b bg-background">
         <Button
           variant="ghost"
           size="icon"
@@ -181,33 +207,56 @@ export default function ConversationPage() {
       </CardHeader>
       <CardContent className="flex-1 p-6 space-y-6 overflow-y-auto">
         {messages.map((message) => {
+          if (!message.id) return null;
           const isMe = message.senderId === user?.uid
-          const sender = isMe ? user : otherUser
+          const sender = isMe ? profile : otherUser
           return (
             <div
               key={message.id}
-              className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+              className={`group flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}
             >
               {!isMe && (
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={sender.avatar} />
+                  <AvatarImage src={sender?.avatar} />
                 </Avatar>
               )}
-              <div
-                className={`rounded-lg px-4 py-2 max-w-xs lg:max-w-md ${isMe ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
-              >
-                <p>{message.text}</p>
-                <p
-                  className={`text-xs mt-1 text-right ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}
-                >
-                  {message.timestamp
-                    ? format(message.timestamp.toDate(), 'p')
-                    : 'sending...'}
-                </p>
-              </div>
-              {isMe && user && (
+               <div className={`flex items-center gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
+                 <div
+                    className={`rounded-lg px-4 py-2 max-w-xs lg:max-w-md ${isMe ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                  >
+                    <p>{message.text}</p>
+                    <p
+                      className={`text-xs mt-1 text-right ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}
+                    >
+                      {message.timestamp
+                        ? format(message.timestamp.toDate(), 'p')
+                        : 'sending...'}
+                    </p>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                       <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100">
+                          <MoreHorizontal className="h-4 w-4" />
+                       </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      {isMe ? (
+                         <DropdownMenuItem onClick={() => handleDeleteMessage(message.id!)} className="text-destructive">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                         </DropdownMenuItem>
+                      ) : (
+                         <DropdownMenuItem onClick={() => handleReportMessage(message.id!)}>
+                            <Flag className="mr-2 h-4 w-4" />
+                            Report
+                         </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+               </div>
+              {isMe && profile && (
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user.photoURL || undefined} />
+                  <AvatarImage src={profile.avatar} />
                 </Avatar>
               )}
             </div>
@@ -215,7 +264,7 @@ export default function ConversationPage() {
         })}
         <div ref={messagesEndRef} />
       </CardContent>
-      <div className="p-4 border-t bg-background">
+      <div className="p-4 border-t bg-background shrink-0">
         <form onSubmit={handleSendMessage} className="relative">
           <Input
             placeholder="Type a message..."
@@ -227,6 +276,7 @@ export default function ConversationPage() {
             type="submit"
             size="icon"
             className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+            disabled={!newMessage.trim()}
           >
             <SendHorizonal className="h-4 w-4" />
           </Button>
@@ -235,3 +285,5 @@ export default function ConversationPage() {
     </Card>
   )
 }
+
+    
