@@ -2,7 +2,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, addDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type Job } from '@/lib/data';
 import {
@@ -14,13 +14,14 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Briefcase, Calendar, DollarSign, User } from 'lucide-react';
+import { ArrowLeft, Briefcase, Calendar, DollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
-import Link from 'next/link';
+import { useAuth } from '@/hooks/use-auth';
+import { useToast } from '@/hooks/use-toast';
 
 function JobDetailSkeleton() {
   return (
@@ -49,8 +50,11 @@ export default function JobDetailPage() {
   const router = useRouter();
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const { user } = useAuth();
+  const { toast } = useToast();
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     async function fetchJob() {
@@ -61,7 +65,6 @@ export default function JobDetailPage() {
           if (jobDocSnap.exists()) {
             setJob({ id: jobDocSnap.id, ...jobDocSnap.data() } as Job);
           } else {
-            // Handle case where job is not found
             console.log('No such document!');
           }
         } catch (error) {
@@ -76,6 +79,66 @@ export default function JobDetailPage() {
 
     fetchJob();
   }, [id]);
+
+  const handleApply = async () => {
+    if (!user || !job) return;
+    setApplying(true);
+    
+    try {
+        const conversationsRef = collection(db, 'conversations');
+        // Check if a conversation already exists for this job and these two users
+        const q = query(conversationsRef, 
+            where('jobId', '==', job.id),
+            where('participantIds', 'array-contains', user.uid)
+        );
+
+        const querySnapshot = await getDocs(q);
+        let conversationId: string | null = null;
+        
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.participantIds.includes(job.postedBy.uid)) {
+                conversationId = doc.id;
+            }
+        });
+
+        // If no conversation exists, create a new one
+        if (!conversationId) {
+            const newConversationRef = doc(conversationsRef);
+            await setDoc(newConversationRef, {
+                jobId: job.id,
+                participantIds: [user.uid, job.postedBy.uid],
+                createdAt: serverTimestamp(),
+            });
+            conversationId = newConversationRef.id;
+            
+            // Add an initial message to the conversation
+            const messagesRef = collection(db, `conversations/${conversationId}/messages`);
+            await addDoc(messagesRef, {
+                senderId: user.uid,
+                text: `Hi, I'm interested in applying for the "${job.title}" position.`,
+                timestamp: serverTimestamp(),
+            });
+
+             // Update last message on conversation
+            await setDoc(doc(db, 'conversations', conversationId), {
+                lastMessage: {
+                    text: `Hi, I'm interested in applying for the "${job.title}" position.`,
+                    timestamp: serverTimestamp()
+                }
+            }, { merge: true });
+        }
+        
+        // Navigate to the conversation
+        router.push(`/messages/${conversationId}`);
+
+    } catch (error) {
+        console.error("Error applying for job: ", error);
+        toast({ title: "Error", description: "Could not start conversation. Please try again.", variant: "destructive" });
+    } finally {
+        setApplying(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -93,12 +156,14 @@ export default function JobDetailPage() {
     return (
       <div className="text-center">
         <p className="text-lg font-semibold">Job not found</p>
-        <Button variant="link" onClick={() => router.push('/dashboard')}>
-          Return to Dashboard
+        <Button asChild variant="link">
+          <Link href="/dashboard">Return to Dashboard</Link>
         </Button>
       </div>
     );
   }
+  
+  const isJobPoster = user?.uid === job.postedBy.uid;
 
   return (
     <div className="space-y-6">
@@ -159,11 +224,11 @@ export default function JobDetailPage() {
             </div>
         </CardContent>
         <CardFooter>
-          <Button asChild size="lg">
-            <Link href={`/messages/application-convo-1?jobTitle=${encodeURIComponent(job.title)}&posterName=${encodeURIComponent(job.postedBy.name)}&posterAvatar=${encodeURIComponent(job.postedBy.avatar)}`}>
-              Apply for this Job
-            </Link>
-          </Button>
+          {!isJobPoster && (
+            <Button onClick={handleApply} size="lg" disabled={applying}>
+              {applying ? 'Starting conversation...' : 'Apply for this Job'}
+            </Button>
+          )}
         </CardFooter>
       </Card>
     </div>

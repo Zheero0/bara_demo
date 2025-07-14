@@ -18,6 +18,7 @@ export type Job = {
   price: number;
   description: string;
   postedBy: {
+    uid: string; // Keep track of the poster's user ID
     name: string;
     avatar: string;
   };
@@ -31,19 +32,23 @@ export type Connection = {
 };
 
 export type Message = {
-  id: string;
-  sender: 'me' | 'them';
+  id?: string; // ID will be assigned by Firestore
+  senderId: string;
   text: string;
-  timestamp: string;
+  timestamp: Timestamp;
 };
 
 export type Conversation = {
     id: string;
-    user: User;
-    lastMessage: string;
-    lastMessageTimestamp: string;
-    messages: Message[];
-}
+    participantIds: string[];
+    jobId: string;
+    lastMessage?: {
+        text: string;
+        timestamp: Timestamp;
+    };
+    // We'll fetch participant details on the fly
+};
+
 
 export const mockUsers: User[] = [
   { id: '1', email: 'alice@example.com', name: 'Alice Johnson', avatar: 'https://placehold.co/100x100.png', headline: 'Full-Stack Developer | React & Node.js', location: 'San Francisco, CA', connections: 152, about: 'Passionate developer with 5+ years of experience building web applications.' },
@@ -53,13 +58,13 @@ export const mockUsers: User[] = [
   { id: '5', email: 'ethan@example.com', name: 'Ethan Hunt', avatar: 'https://placehold.co/100x100.png', headline: 'DevOps Engineer | AWS & Kubernetes', location: 'Seattle, WA', connections: 180, about: 'Automating infrastructure and scaling systems for growth.' },
 ];
 
-export const mockJobs: Omit<Job, 'id'>[] = [
-  { title: 'E-commerce Website Redesign', category: 'Web Development', price: 5000, description: 'We are looking for an experienced developer to redesign our Shopify store. Must have a strong portfolio.', postedBy: { name: 'Fashion Co.', avatar: 'https://placehold.co/40x40.png' } },
-  { title: 'Mobile App UI/UX Design', category: 'Design', price: 3500, description: 'Design a new mobile application for a fitness startup. Experience with Figma is required.', postedBy: { name: 'FitLife App', avatar: 'https://placehold.co/40x40.png' } },
-  { title: 'Cloud Infrastructure Setup', category: 'DevOps', price: 7000, description: 'Setup a scalable and secure cloud infrastructure on AWS for our growing SaaS platform.', postedBy: { name: 'SaaS Inc.', avatar: 'https://placehold.co/40x40.png' } },
-  { title: 'Content Writer for Tech Blog', category: 'Writing', price: 1500, description: 'Write 4 high-quality blog posts per month about software development trends.', postedBy: { name: 'Tech Weekly', avatar: 'https://placehold.co/40x40.png' } },
-  { title: 'React Native Developer for MVP', category: 'Mobile Development', price: 6000, description: 'Develop a cross-platform MVP for a new social networking app.', postedBy: { name: 'ConnectApp', avatar: 'https://placehold.co/40x40.png' } },
-  { title: 'Data Visualization Dashboard', category: 'Data Science', price: 4500, description: 'Create an interactive data dashboard using D3.js or a similar library to visualize sales data.', postedBy: { name: 'Analytics Corp', avatar: 'https://placehold.co/40x40.png' } },
+export const mockJobs: Omit<Job, 'id' | 'postedBy'>[] = [
+  { title: 'E-commerce Website Redesign', category: 'Web Development', price: 5000, description: 'We are looking for an experienced developer to redesign our Shopify store. Must have a strong portfolio.' },
+  { title: 'Mobile App UI/UX Design', category: 'Design', price: 3500, description: 'Design a new mobile application for a fitness startup. Experience with Figma is required.' },
+  { title: 'Cloud Infrastructure Setup', category: 'DevOps', price: 7000, description: 'Setup a scalable and secure cloud infrastructure on AWS for our growing SaaS platform.' },
+  { title: 'Content Writer for Tech Blog', category: 'Writing', price: 1500, description: 'Write 4 high-quality blog posts per month about software development trends.' },
+  { title: 'React Native Developer for MVP', category: 'Mobile Development', price: 6000, description: 'Develop a cross-platform MVP for a new social networking app.' },
+  { title: 'Data Visualization Dashboard', category: 'Data Science', price: 4500, description: 'Create an interactive data dashboard using D3.js or a similar library to visualize sales data.' },
 ];
 
 export const connections: Connection[] = [
@@ -69,38 +74,6 @@ export const connections: Connection[] = [
   { id: 'conn-4', user: mockUsers[4], status: 'pending' },
 ];
 
-export const conversations: Conversation[] = [
-    {
-        id: 'convo-1',
-        user: mockUsers[1],
-        lastMessage: 'Sure, I can have the prototype ready by Friday.',
-        lastMessageTimestamp: '2h ago',
-        messages: [
-            { id: 'msg-1-1', sender: 'them', text: 'Hey, how is the design coming along?', timestamp: '3h ago' },
-            { id: 'msg-1-2', sender: 'me', text: 'Going great! Just finalizing the color palette. I should have a prototype for you to review by EOD Friday.', timestamp: '2h ago' },
-            { id: 'msg-1-3', sender: 'them', text: 'Sure, I can have the prototype ready by Friday.', timestamp: '2h ago' }
-        ]
-    },
-    {
-        id: 'convo-2',
-        user: mockUsers[2],
-        lastMessage: 'Perfect, thank you!',
-        lastMessageTimestamp: '1d ago',
-        messages: [
-             { id: 'msg-2-1', sender: 'me', text: 'Just sent over the contract.', timestamp: '1d ago' },
-             { id: 'msg-2-2', sender: 'them', text: 'Perfect, thank you!', timestamp: '1d ago' },
-        ]
-    },
-    {
-        id: 'convo-3',
-        user: mockUsers[3],
-        lastMessage: 'Let\'s schedule a call for tomorrow morning.',
-        lastMessageTimestamp: '3d ago',
-        messages: [
-            { id: 'msg-3-1', sender: 'them', text: 'Let\'s schedule a call for tomorrow morning.', timestamp: '3d ago' }
-        ]
-    }
-]
 
 // The concept of a single 'currentUser' is replaced by fetching the logged-in user's profile.
 // We keep this here for now to avoid breaking other components that might still use it.

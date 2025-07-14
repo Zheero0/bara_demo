@@ -80,6 +80,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
       await addDoc(jobsCollection, {
         ...values,
         postedBy: {
+          uid: user.uid,
           name: user.displayName || "Anonymous",
           avatar: user.photoURL || `https://placehold.co/40x40.png`,
         },
@@ -193,7 +194,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "jobs"), (snapshot) => {
       const jobsData: Job[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
-      setJobs(jobsData);
+      setJobs(jobsData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)));
       setLoading(false);
     });
 
