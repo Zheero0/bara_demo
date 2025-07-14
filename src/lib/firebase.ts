@@ -5,12 +5,12 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+  apiKey: "AIzaSyBfGv--KCqa-JM7QY2UlM02hB3quAUwP1U",
+  authDomain: "bara-test-a5632.firebaseapp.com",
+  projectId: "bara-test-a5632",
+  storageBucket: "bara-test-a5632.firebasestorage.app",
+  messagingSenderId: "750307256700",
+  appId: "1:750307256700:web:b98a7304b70c83314b9cf9"
 };
 
 // Initialize Firebase

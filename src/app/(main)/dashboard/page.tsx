@@ -1,3 +1,4 @@
+'use client';
 import {
   Card,
   CardContent,
@@ -15,15 +16,32 @@ import {
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { jobs } from "@/lib/data"
+import { type Job } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import Link from "next/link"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { useEffect, useState } from "react"
+import { collection, onSnapshot } from "firebase/firestore"
+import { db } from "@/lib/firebase"
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "jobs"), (snapshot) => {
+      const jobsData: Job[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
+      setJobs(jobsData);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between mb-4">
@@ -64,36 +82,59 @@ export default function DashboardPage() {
         </div>
       </div>
       <ScrollArea className="flex-1 pr-6 -mr-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {jobs.map((job) => (
-            <Card key={job.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div>
-                      <CardTitle className="font-headline text-lg mb-1">{job.title}</CardTitle>
-                      <CardDescription className="flex items-center gap-2">
-                          <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
-                          {job.postedBy.name}
-                      </CardDescription>
+        {loading ? (
+           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent>
+                   <Skeleton className="h-4 w-full mb-2" />
+                   <Skeleton className="h-4 w-full mb-2" />
+                   <Skeleton className="h-4 w-3/4" />
+                </CardContent>
+                <Separator className="my-4" />
+                <CardFooter className="flex justify-between items-center">
+                  <Skeleton className="h-8 w-1/4" />
+                  <Skeleton className="h-10 w-1/3" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {jobs.map((job) => (
+              <Card key={job.id}>
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div>
+                        <CardTitle className="font-headline text-lg mb-1">{job.title}</CardTitle>
+                        <CardDescription className="flex items-center gap-2">
+                            <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
+                            {job.postedBy.name}
+                        </CardDescription>
+                    </div>
+                    <Badge variant="secondary">{job.category}</Badge>
                   </div>
-                  <Badge variant="secondary">{job.category}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {job.description}
-                </p>
-              </CardContent>
-              <Separator className="my-4" />
-              <CardFooter className="flex justify-between items-center">
-                <div className="text-lg font-bold text-primary">${job.price.toLocaleString()}</div>
-                <Button asChild>
-                  <Link href="#">View Job</Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground line-clamp-3">
+                    {job.description}
+                  </p>
+                </CardContent>
+                <Separator className="my-4" />
+                <CardFooter className="flex justify-between items-center">
+                  <div className="text-lg font-bold text-primary">${job.price.toLocaleString()}</div>
+                  <Button asChild>
+                    <Link href="#">View Job</Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
       </ScrollArea>
     </div>
   )
