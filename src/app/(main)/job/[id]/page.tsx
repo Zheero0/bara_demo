@@ -1,7 +1,7 @@
 
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { type Job } from '@/lib/data';
@@ -45,9 +45,10 @@ function JobDetailSkeleton() {
   );
 }
 
-export default function JobDetailPage({ params }: { params: { id: string } }) {
+export default function JobDetailPage() {
   const router = useRouter();
-  const { id } = params;
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
 
