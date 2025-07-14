@@ -147,7 +147,7 @@ export default function ProfilePage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                             <ShieldX className="mr-2 h-4 w-4" />
-                            Block User
+                            Block User 
                         </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
