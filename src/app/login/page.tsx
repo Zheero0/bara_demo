@@ -22,9 +22,6 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // For this demo, we'll log in with a test user.
-      // In a real app, you would have a signup flow.
-      // Test user: test@example.com / password
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/dashboard');
     } catch (error: any) {
@@ -56,7 +53,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="test@example.com"
+                placeholder="m@example.com"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -68,7 +65,6 @@ export default function LoginPage() {
                 id="password" 
                 type="password" 
                 required 
-                placeholder="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />

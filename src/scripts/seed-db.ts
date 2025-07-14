@@ -1,23 +1,8 @@
 
 // A simple script to seed the database with some initial data.
-import { collection, addDoc, serverTimestamp, setDoc, doc } from 'firebase/firestore';
-import { db, auth } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { mockJobs } from '../lib/data';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-
-async function seedAuth() {
-    console.log('Seeding auth with test user...');
-    try {
-        await createUserWithEmailAndPassword(auth, 'test@example.com', 'password');
-        console.log('Test user created: test@example.com / password');
-    } catch (error: any) {
-        if (error.code === 'auth/email-already-in-use') {
-            console.log('Test user already exists.');
-        } else {
-            console.error('Error creating test user:', error);
-        }
-    }
-}
 
 async function seedJobs() {
     console.log('Seeding jobs collection...');
@@ -36,9 +21,9 @@ async function seedJobs() {
 
 async function main() {
     try {
-        await seedAuth();
+        console.log('Seeding database...');
         await seedJobs();
-        console.log('Database seeded successfully!');
+        console.log('Database seeded successfully! Please add a user manually in your Firebase console.');
     } catch (error) {
         console.error('Error seeding database:', error);
     } finally {
