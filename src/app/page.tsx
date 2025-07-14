@@ -27,7 +27,7 @@ export default function LandingPage() {
     },
     {
         name: 'Pro Monthly',
-        price: '£25',
+        price: '£9.99',
         priceDescription: '/month',
         description: 'For professionals ready to level up.',
         features: [
@@ -41,12 +41,12 @@ export default function LandingPage() {
     },
     {
         name: 'Pro Annual',
-        price: '£250',
+        price: '£99',
         priceDescription: '/year',
         description: 'For committed professionals.',
         features: [
             'All features from Pro Monthly',
-            'Save £50 (2 months free)',
+            'Save ~£20 (2+ months free)',
             'Top priority support',
         ],
         buttonText: 'Go Pro Annual',

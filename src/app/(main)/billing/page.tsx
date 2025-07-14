@@ -36,7 +36,7 @@ const plans = [
     },
     {
         name: 'Pro Monthly',
-        price: '£25',
+        price: '£9.99',
         priceDescription: '/month',
         description: 'Unlock your full potential with Pro.',
         features: [
@@ -49,12 +49,12 @@ const plans = [
     },
     {
         name: 'Pro Annual',
-        price: '£250',
+        price: '£99',
         priceDescription: '/year',
         description: 'Save with an annual subscription.',
         features: [
             'All features from Pro Monthly',
-            '2 months free (save £50)',
+            '2+ months free (save ~£20)',
             'Top priority support',
             'Early access to new features'
         ],
