@@ -271,38 +271,38 @@ function JobDetailView({ job }: { job: Job }) {
           </div>
         </CardHeader>
         <Separator />
-        <CardContent className="pt-6 grid md:grid-cols-3 gap-8">
-            <div className="md:col-span-2 space-y-6">
+        <CardContent className="pt-6 space-y-8">
+            <div className="space-y-4">
+              <h3 className="font-semibold text-xl font-headline">Job Details</h3>
+              <div className="p-4 bg-muted/50 rounded-lg flex flex-wrap gap-x-8 gap-y-4">
+                  <div className="flex items-center">
+                      <DollarSign className="w-5 h-5 mr-3 text-primary" />
+                      <div>
+                          <p className="text-sm text-muted-foreground">Price</p>
+                          <p className="font-semibold">${job.price.toLocaleString()}</p>
+                      </div>
+                  </div>
+                  <div className="flex items-center">
+                      <Briefcase className="w-5 h-5 mr-3 text-primary" />
+                      <div>
+                          <p className="text-sm text-muted-foreground">Category</p>
+                          <p className="font-semibold">{job.category}</p>
+                      </div>
+                  </div>
+                  {job.createdAt && (
+                      <div className="flex items-center">
+                          <Calendar className="w-5 h-5 mr-3 text-primary" />
+                          <div>
+                              <p className="text-sm text-muted-foreground">Date Posted</p>
+                              <p className="font-semibold">{format(job.createdAt.toDate(), 'PPP')}</p>
+                          </div>
+                      </div>
+                  )}
+              </div>
+            </div>
+            <div className="space-y-4">
                 <h3 className="font-semibold text-xl font-headline">Job Description</h3>
                 <p className="text-muted-foreground whitespace-pre-wrap">{job.description}</p>
-            </div>
-             <div className="space-y-6">
-                <h3 className="font-semibold text-xl font-headline">Job Details</h3>
-                <div className="p-4 bg-muted/50 rounded-lg space-y-4">
-                     <div className="flex items-center">
-                        <DollarSign className="w-5 h-5 mr-3 text-primary" />
-                        <div>
-                            <p className="text-sm text-muted-foreground">Price</p>
-                            <p className="font-semibold">${job.price.toLocaleString()}</p>
-                        </div>
-                    </div>
-                     <div className="flex items-center">
-                        <Briefcase className="w-5 h-5 mr-3 text-primary" />
-                        <div>
-                            <p className="text-sm text-muted-foreground">Category</p>
-                            <p className="font-semibold">{job.category}</p>
-                        </div>
-                    </div>
-                     {job.createdAt && (
-                        <div className="flex items-center">
-                            <Calendar className="w-5 h-5 mr-3 text-primary" />
-                            <div>
-                                <p className="text-sm text-muted-foreground">Date Posted</p>
-                                <p className="font-semibold">{format(job.createdAt.toDate(), 'PPP')}</p>
-                            </div>
-                        </div>
-                     )}
-                </div>
             </div>
         </CardContent>
       </ScrollArea>
