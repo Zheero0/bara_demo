@@ -118,9 +118,9 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
                 <Briefcase className="h-4 w-4" />
                 Jobs
               </NavLink>
-              <NavLink href="/messages">
+              <NavLink href="/chat">
                 <MessageSquare className="h-4 w-4" />
-                Messages
+                Chat
                 {unreadCount > 0 && (
                   <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                     {unreadCount}
@@ -162,7 +162,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-screen overflow-y-auto">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
           <Sheet>
             <SheetTrigger asChild>
@@ -182,9 +182,9 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
                   <Briefcase className="h-5 w-5" />
                   Jobs
                 </NavLink>
-                <NavLink href="/messages" variant="mobile">
+                <NavLink href="/chat" variant="mobile">
                   <MessageSquare className="h-5 w-5" />
-                  Messages
+                  Chat
                   {unreadCount > 0 && (
                     <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                       {unreadCount}
@@ -241,7 +241,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
           <UserNav />
         </header>
-        <main className="flex-1 overflow-y-auto bg-background p-4 lg:p-6">
+        <main className="flex-1 bg-background p-4 lg:p-6">
           {children}
         </main>
       </div>

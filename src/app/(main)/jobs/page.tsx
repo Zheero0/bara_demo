@@ -261,7 +261,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
             }
         }
         
-        router.push(`/messages/${conversationId}`);
+        router.push(`/chat/${conversationId}`);
 
     } catch (error) {
         console.error("Error applying for job: ", error);
