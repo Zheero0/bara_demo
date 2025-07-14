@@ -73,6 +73,7 @@ const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   category: z.string().min(1, "Please select a category."),
   price: z.coerce.number().min(1, "Price must be greater than 0."),
+  jobType: z.string().min(1, "Please select a job type."),
   location: z.string().min(2, "Please specify a location.").max(50, "Location must be 50 characters or less."),
   description: z.string().min(20, "Description must be at least 20 characters long."),
 });
@@ -154,6 +155,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
       title: "",
       category: "",
       price: 0,
+      jobType: "",
       location: "",
       description: "",
     },
@@ -252,19 +254,40 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
                   )}
                 />
                  <FormField
-                    control={form.control}
-                    name="location"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <FormControl>
-                           <LocationCombobox value={field.value} onChange={field.onChange} />
+                  control={form.control}
+                  name="jobType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a job type" />
+                          </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                        <SelectContent>
+                          <SelectItem value="On-site">On-site</SelectItem>
+                          <SelectItem value="Remote">Remote</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
             </div>
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                   <FormControl>
+                     <LocationCombobox value={field.value} onChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="description"
@@ -421,7 +444,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                       <MapPin className="w-4 h-4 text-primary shrink-0 mt-1" />
                       <div>
                           <p className="text-xs text-muted-foreground">Location</p>
-                          <p className="font-semibold text-sm">{job.location}</p>
+                          <p className="font-semibold text-sm">{job.location} ({job.jobType})</p>
                       </div>
                   </div>
                   <div className="flex items-start space-x-2">
@@ -510,8 +533,7 @@ function JobsContent() {
         : true;
         
       const matchesJobType = jobTypeFilter !== 'All Types'
-        ? (job.location?.toLowerCase() === 'remote' && jobTypeFilter === 'Remote') || 
-          (job.location?.toLowerCase() !== 'remote' && jobTypeFilter === 'On-site')
+        ? job.jobType === jobTypeFilter
         : true;
 
       const matchesPrice = priceFilter !== 'All Prices'
@@ -687,5 +709,3 @@ export default function JobsPage() {
     </Suspense>
   )
 }
-
-    
