@@ -44,9 +44,10 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, DollarSign, BriefcaseBusiness } from "lucide-react"
+import { Briefcase, Calendar, DollarSign, BriefcaseBusiness, ArrowLeft } from "lucide-react"
 import { format } from "date-fns"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils";
 
 const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -186,7 +187,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
   );
 }
 
-function JobDetailView({ job }: { job: Job }) {
+function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -258,14 +259,19 @@ function JobDetailView({ job }: { job: Job }) {
       <ScrollArea className="flex-1">
         <CardHeader>
           <div className="flex justify-between items-start">
-            <div>
-              <CardTitle className="text-2xl font-headline">{job.title}</CardTitle>
-              <CardDescription className="mt-2">
-                <div className="flex items-center gap-2">
-                    <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={24} height={24} className="rounded-full" data-ai-hint="logo" />
-                    <span>Posted by {job.postedBy.name}</span>
+             <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div>
+                    <CardTitle className="text-2xl font-headline">{job.title}</CardTitle>
+                    <CardDescription className="mt-2">
+                        <div className="flex items-center gap-2">
+                            <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={24} height={24} className="rounded-full" data-ai-hint="logo" />
+                            <span>Posted by {job.postedBy.name}</span>
+                        </div>
+                    </CardDescription>
                 </div>
-              </CardDescription>
             </div>
              <Badge variant="secondary" className="text-base px-4 py-2">{job.category}</Badge>
           </div>
@@ -319,7 +325,7 @@ function JobDetailView({ job }: { job: Job }) {
 
 function EmptyJobView() {
     return (
-        <Card className="h-full flex flex-col items-center justify-center text-center p-8">
+        <Card className="h-full flex-col items-center justify-center text-center p-8 hidden md:flex">
             <BriefcaseBusiness className="w-16 h-16 text-muted-foreground/50 mb-4" />
             <h2 className="text-xl font-semibold">Select a job to view details</h2>
             <p className="text-muted-foreground mt-1">Choose a job from the list on the left to get started.</p>
@@ -332,6 +338,7 @@ export default function DashboardPage() {
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "jobs"), (snapshot) => {
@@ -349,12 +356,13 @@ export default function DashboardPage() {
   
   const handleJobSelect = (job: Job) => {
       setSelectedJob(job);
+      setMobileView('detail');
   }
 
   return (
-    <div className="grid grid-cols-10 gap-6 h-full">
+    <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
-        <div className="col-span-4 flex flex-col gap-4">
+        <div className={cn("md:col-span-4 flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex items-center justify-between">
                 <div>
                 <h1 className="text-3xl font-headline font-bold">Job Marketplace</h1>
@@ -418,11 +426,11 @@ export default function DashboardPage() {
              </ScrollArea>
         </div>
         {/* Right Column */}
-        <div className="col-span-6 h-full">
+        <div className={cn("md:col-span-6 h-full", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
             {loading ? (
                 <Card className="h-full"><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
             ) : selectedJob ? (
-                <JobDetailView job={selectedJob} />
+                <JobDetailView job={selectedJob} onBack={() => setMobileView('list')} />
             ) : (
                 <EmptyJobView />
             )}
