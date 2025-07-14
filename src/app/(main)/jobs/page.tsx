@@ -44,7 +44,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,6 +54,7 @@ import {
 import { format } from "date-fns"
 import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -276,16 +277,42 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                     <CardTitle className="text-xl font-headline break-words">{job.title}</CardTitle>
                     <CardDescription className="mt-1">
                         <div className="flex items-center gap-2 text-xs">
                             <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
-                            <span>Posted by {job.postedBy.name}</span>
+                            <span>
+                                Posted by{' '}
+                                <Link href={`/profile/${job.postedBy.uid}`} className="font-medium text-foreground hover:underline">
+                                    {job.postedBy.name}
+                                </Link>
+                            </span>
                         </div>
                     </CardDescription>
                 </div>
             </div>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link href={`/profile/${job.postedBy.uid}`}>
+                            <User className="mr-2 h-4 w-4" />
+                            Go to user's profile
+                        </Link>
+                    </DropdownMenuItem>
+                    {!isJobPoster && (
+                         <DropdownMenuItem>
+                            <Flag className="mr-2 h-4 w-4" />
+                            Report Job
+                        </DropdownMenuItem>
+                    )}
+                </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </CardHeader>
         <Separator />
@@ -504,3 +531,5 @@ export default function JobsPage() {
     </Suspense>
   )
 }
+
+    
