@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { type Job } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
@@ -1016,5 +1016,3 @@ export default function JobsPage() {
     </Suspense>
   )
 }
-
-    
