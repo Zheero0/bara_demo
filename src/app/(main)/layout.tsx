@@ -142,7 +142,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col max-h-screen overflow-hidden">
+      <div className="flex flex-col max-h-screen">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
           <Sheet>
             <SheetTrigger asChild>
@@ -214,7 +214,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
           <UserNav />
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background overflow-hidden">
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-background overflow-y-auto">
           {children}
         </main>
       </div>
