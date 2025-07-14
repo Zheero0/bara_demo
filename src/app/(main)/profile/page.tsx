@@ -189,7 +189,7 @@ export default function ProfilePage() {
                 <CardHeader>
                     <CardTitle className="font-headline">Reviews</CardTitle>
                     <CardDescription>What others are saying about {profile.name}.</CardDescription>
-                </Header>
+                </CardHeader>
                 <CardContent className="text-center text-muted-foreground py-12">
                     <p>No reviews yet.</p>
                 </CardContent>
