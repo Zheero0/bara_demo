@@ -26,6 +26,9 @@ import { Input } from "@/components/ui/input"
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { UserNav } from "@/components/user-nav"
@@ -177,8 +180,15 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col">
-              <nav className="grid gap-2 text-lg font-medium">
-                <Logo />
+              <SheetHeader>
+                <SheetTitle>
+                   <Logo />
+                </SheetTitle>
+                <SheetDescription>
+                  Navigate through the app's features.
+                </SheetDescription>
+              </SheetHeader>
+              <nav className="grid gap-2 text-lg font-medium py-4">
                 <NavLink href="/jobs" variant="mobile" onClick={() => setIsSheetOpen(false)}>
                   <Briefcase className="h-5 w-5" />
                   Jobs
