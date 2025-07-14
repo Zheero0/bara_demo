@@ -171,7 +171,7 @@ export default function ProfilePage() {
                                 <CardFooter className="flex justify-between items-center">
                                     <div className="text-lg font-bold text-primary">${job.price.toLocaleString()}</div>
                                     <Button asChild variant="outline">
-                                        <Link href="#">View Job</Link>
+                                        <Link href={`/job/${job.id}`}>View Job</Link>
                                     </Button>
                                 </CardFooter>
                             </Card>
@@ -189,7 +189,7 @@ export default function ProfilePage() {
                 <CardHeader>
                     <CardTitle className="font-headline">Reviews</CardTitle>
                     <CardDescription>What others are saying about {profile.name}.</CardDescription>
-                </CardHeader>
+                </Header>
                 <CardContent className="text-center text-muted-foreground py-12">
                     <p>No reviews yet.</p>
                 </CardContent>

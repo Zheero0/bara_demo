@@ -286,7 +286,7 @@ export default function DashboardPage() {
                 <CardFooter className="flex justify-between items-center">
                   <div className="text-lg font-bold text-primary">${job.price.toLocaleString()}</div>
                   <Button asChild>
-                    <Link href="#">View Job</Link>
+                    <Link href={`/job/${job.id}`}>View Job</Link>
                   </Button>
                 </CardFooter>
               </Card>
