@@ -200,6 +200,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
     
     try {
         const conversationsRef = collection(db, 'conversations');
+        // A more reliable way is to check for a conversation that includes both users for this specific job.
         const q = query(conversationsRef, 
             where('jobId', '==', job.id),
             where('participantIds', 'array-contains', user.uid)
@@ -220,21 +221,23 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
+            // Create new conversation
             const newConversationRef = doc(collection(db, 'conversations'));
             const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
 
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
+                createdAt: serverTimestamp(),
                 lastMessage: {
                     text: initialMessage,
                     senderId: user.uid,
                     timestamp: serverTimestamp()
-                },
-                createdAt: serverTimestamp(),
+                }
             });
             conversationId = newConversationRef.id;
             
+            // Add initial message to subcollection
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             await addDoc(messagesRef, {
                 senderId: user.uid,
@@ -306,7 +309,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
               </div>
             </div>
             <div className="space-y-4">
-                <h3 className="font-semibold text-lg font-headline">Job Description</h3>
+                <h3 className="font-semibold text-base font-headline">Job Description</h3>
                 <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.description}</p>
             </div>
         </CardContent>
@@ -383,8 +386,8 @@ function JobsContent() {
         <div className={cn("md:col-span-4 flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                <h1 className="text-2xl font-headline font-bold">Job Marketplace</h1>
-                <p className="text-muted-foreground">Find your next project.</p>
+                <h1 className="text-xl font-headline font-bold">Job Marketplace</h1>
+                <p className="text-sm text-muted-foreground">Find your next project.</p>
                 </div>
                 <div className="flex-shrink-0 md:self-end">
                     <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
