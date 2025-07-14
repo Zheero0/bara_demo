@@ -20,7 +20,8 @@ import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
-import { doc, setDoc, updateProfile as updateFirebaseProfile } from "firebase/firestore"
+import { doc, setDoc } from "firebase/firestore";
+import { updateProfile as updateFirebaseProfile } from "firebase/auth";
 import { db, auth } from "@/lib/firebase"
 import { useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton";
