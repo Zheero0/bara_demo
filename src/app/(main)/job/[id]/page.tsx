@@ -47,14 +47,15 @@ function JobDetailSkeleton() {
 
 export default function JobDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const { id } = params;
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchJob() {
-      if (params.id) {
+      if (id) {
         try {
-          const jobDocRef = doc(db, 'jobs', params.id);
+          const jobDocRef = doc(db, 'jobs', id);
           const jobDocSnap = await getDoc(jobDocRef);
           if (jobDocSnap.exists()) {
             setJob({ id: jobDocSnap.id, ...jobDocSnap.data() } as Job);
@@ -67,11 +68,13 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
         } finally {
           setLoading(false);
         }
+      } else {
+        setLoading(false);
       }
     }
 
     fetchJob();
-  }, [params.id]);
+  }, [id]);
 
   if (loading) {
     return (
