@@ -76,6 +76,9 @@ export default function ChatPage() {
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
         const convosPromises = querySnapshot.docs.map(async (convoDoc) => {
             const convoData = convoDoc.data();
+            // Filter out conversations that are empty
+            if (!convoData.lastMessage) return null;
+
             const otherUserId = convoData.participantIds.find((id: string) => id !== user.uid);
             if (!otherUserId) return null;
             

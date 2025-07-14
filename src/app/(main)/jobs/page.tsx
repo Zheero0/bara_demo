@@ -232,17 +232,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
 
             const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
 
-            // 2. Set the initial conversation data
-            await setDoc(newConversationRef, {
-                jobId: job.id,
-                participantIds: [user.uid, job.postedBy.uid],
-                lastMessage: {
-                    text: initialMessage,
-                    senderId: user.uid,
-                }
-            });
-
-            // 3. Add the first message to the subcollection
+            // 2. Add the first message to the subcollection
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             const newMessageDoc = await addDoc(messagesRef, {
                 senderId: user.uid,
@@ -250,15 +240,20 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                 timestamp: serverTimestamp(),
             });
 
-            // 4. Update the conversation with the timestamp from the new message
+            // 3. Get the timestamp from the newly created message
             const newMessageSnap = await getFirestoreDoc(newMessageDoc);
             const newMessageData = newMessageSnap.data();
 
-            if (newMessageData && newMessageData.timestamp) {
-                 await updateDoc(newConversationRef, {
-                    'lastMessage.timestamp': newMessageData.timestamp
-                 });
-            }
+            // 4. Set the initial conversation data, including the lastMessage
+            await setDoc(newConversationRef, {
+                jobId: job.id,
+                participantIds: [user.uid, job.postedBy.uid],
+                lastMessage: {
+                    text: initialMessage,
+                    senderId: user.uid,
+                    timestamp: newMessageData?.timestamp || serverTimestamp(), // Use serverTimestamp as fallback
+                }
+            });
         }
         
         router.push(`/chat/${conversationId}`);
