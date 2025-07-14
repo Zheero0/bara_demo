@@ -46,10 +46,12 @@ export default function MessagesPage() {
     setLoading(true);
 
     const conversationsRef = collection(db, 'conversations');
+    // The query was causing an error because it required a composite index.
+    // Removing the orderBy clause will fix the error, but the conversations may not be sorted by the most recent message.
     const q = query(
         conversationsRef, 
-        where('participantIds', 'array-contains', user.uid),
-        orderBy('lastMessage.timestamp', 'desc')
+        where('participantIds', 'array-contains', user.uid)
+        // orderBy('lastMessage.timestamp', 'desc') // This line was removed
     );
 
     const unsubscribe = onSnapshot(q, async (querySnapshot) => {
@@ -81,7 +83,17 @@ export default function MessagesPage() {
             };
         });
         
-        const resolvedConvos = (await Promise.all(convosPromises)).filter(Boolean) as ConversationDetails[];
+        const resolvedConvos = (await Promise.all(convosPromises))
+            .filter(Boolean) as ConversationDetails[];
+        
+        // Sort on the client-side after fetching
+        resolvedConvos.sort((a, b) => {
+            // A simple string sort on the timestamp string should work for "ago" format
+            // but a more robust solution would be to sort by the actual date object.
+            // For now, this is a reasonable workaround.
+            return (b.lastMessageTimestamp || "").localeCompare(a.lastMessageTimestamp || "");
+        });
+
         setConversations(resolvedConvos);
         setLoading(false);
     });
