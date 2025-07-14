@@ -273,7 +273,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
   };
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex flex-col">
       <ScrollArea className="flex-1">
         <CardHeader>
           <div className="flex justify-between items-start">
@@ -298,23 +298,23 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
             <div className="space-y-4">
               <h3 className="font-semibold text-sm font-headline">Job Details</h3>
               <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-                  <div className="flex items-center">
-                      <DollarSign className="w-4 h-4 mr-2 text-primary shrink-0" />
+                  <div className="flex items-start">
+                      <DollarSign className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
                           <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
                       </div>
                   </div>
-                  <div className="flex items-center">
-                      <Briefcase className="w-4 h-4 mr-2 text-primary shrink-0" />
+                  <div className="flex items-start">
+                      <Briefcase className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Category</p>
                           <p className="font-semibold text-sm">{job.category}</p>
                       </div>
                   </div>
                   {job.createdAt && (
-                      <div className="flex items-center">
-                          <Calendar className="w-4 h-4 mr-2 text-primary shrink-0" />
+                      <div className="flex items-start">
+                          <Calendar className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
                           <div>
                               <p className="text-xs text-muted-foreground">Date Posted</p>
                               <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
@@ -402,9 +402,9 @@ function JobsContent() {
 
 
   return (
-    <div className="grid md:grid-cols-10 gap-6 h-full">
+    <div className="grid md:grid-cols-10 gap-6">
         {/* Left Column */}
-        <div className={cn("md:col-span-4 flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
+        <div className={cn("md:col-span-4 flex-col gap-4 h-full", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                 <h1 className="text-xl font-headline font-bold">Job Search</h1>
@@ -443,7 +443,7 @@ function JobsContent() {
                                 className={`cursor-pointer transition-all ${selectedJob?.id === job.id ? 'border-primary' : ''}`}
                                 onClick={() => handleJobSelect(job)}
                             >
-                                <CardHeader className="p-4 pt-4 pb-2">
+                                <CardHeader className="p-3 pt-3 pb-2">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <CardTitle className="font-headline text-base mb-1 line-clamp-1">{job.title}</CardTitle>
@@ -474,9 +474,9 @@ function JobsContent() {
                                         </DropdownMenu>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-4 pt-0">
+                                <CardContent className="p-3 pt-0">
                                     <div className="flex justify-between items-start">
-                                         <p className="text-sm text-muted-foreground pr-4">
+                                         <p className="text-sm text-muted-foreground pr-4 mt-2">
                                             {truncateText(job.description, 25)}
                                         </p>
                                         <div className="text-lg font-bold text-primary whitespace-nowrap">${job.price.toLocaleString()}</div>
@@ -489,7 +489,7 @@ function JobsContent() {
              </ScrollArea>
         </div>
         {/* Right Column */}
-        <div className={cn("md:col-span-6 h-full", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
+        <div className={cn("md:col-span-6 max-h-full", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
             {loading ? (
                 <Card className="h-full"><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
             ) : selectedJob ? (
