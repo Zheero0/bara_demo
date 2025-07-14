@@ -25,8 +25,8 @@ export default function LandingPage() {
             Contact
           </Link>
           {loading ? null : user ? (
-            <Link href="/dashboard">
-              <Button variant="ghost">Dashboard</Button>
+            <Link href="/jobs">
+              <Button variant="ghost">Jobs</Button>
             </Link>
           ) : (
             <>
@@ -40,7 +40,7 @@ export default function LandingPage() {
           )}
         </nav>
         <div className="md:hidden">
-            <Link href="/dashboard">
+            <Link href="/jobs">
                 <Button>Get Started</Button>
             </Link>
         </div>
@@ -55,7 +55,7 @@ export default function LandingPage() {
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
                 Connect, collaborate, and create. Your next opportunity is just a message away.
               </p>
-              <Link href="/dashboard">
+              <Link href="/jobs">
                 <Button size="lg">
                   Find Your Next Opportunity <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
@@ -159,3 +159,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
+    

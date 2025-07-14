@@ -24,7 +24,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.push('/dashboard');
+      router.push('/jobs');
     } catch (error: any) {
       toast({
         title: 'Login Failed',
@@ -85,3 +85,5 @@ export default function LoginPage() {
     </div>
   );
 }
+
+    

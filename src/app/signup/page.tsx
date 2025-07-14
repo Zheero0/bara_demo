@@ -41,7 +41,7 @@ export default function SignUpPage() {
         avatar: `https://placehold.co/100x100.png`
       });
 
-      router.push('/dashboard');
+      router.push('/jobs');
     } catch (error: any) {
       toast({
         title: 'Sign Up Failed',
@@ -112,3 +112,5 @@ export default function SignUpPage() {
     </div>
   );
 }
+
+    

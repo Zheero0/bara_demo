@@ -10,6 +10,7 @@ import {
   Settings,
   User,
   Users,
+  Briefcase
 } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
@@ -48,9 +49,9 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/dashboard?q=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/jobs?q=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      router.push('/dashboard');
+      router.push('/jobs');
     }
   };
 
@@ -109,9 +110,9 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              <NavLink href="/dashboard">
-                <Home className="h-4 w-4" />
-                Dashboard
+              <NavLink href="/jobs">
+                <Briefcase className="h-4 w-4" />
+                Jobs
               </NavLink>
               <NavLink href="/messages">
                 <MessageSquare className="h-4 w-4" />
@@ -168,9 +169,9 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
                 <Logo />
-                <NavLink href="/dashboard" variant="mobile">
-                  <Home className="h-5 w-5" />
-                  Dashboard
+                <NavLink href="/jobs" variant="mobile">
+                  <Briefcase className="h-5 w-5" />
+                  Jobs
                 </NavLink>
                 <NavLink href="/messages" variant="mobile">
                   <MessageSquare className="h-5 w-5" />
@@ -242,3 +243,5 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     </AuthProvider>
   );
 }
+
+    
