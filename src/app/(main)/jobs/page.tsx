@@ -297,7 +297,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         <CardContent className="pt-6 space-y-6">
             <div className="space-y-2">
               <h3 className="font-semibold text-xs font-headline tracking-wider uppercase text-muted-foreground">Job Details</h3>
-              <div className="p-4 border rounded-lg space-y-4">
+              <div className="border rounded-lg space-y-4 p-4">
                   <div className="flex items-center space-x-2">
                       <DollarSign className="w-4 h-4 text-primary shrink-0" />
                       <div>
