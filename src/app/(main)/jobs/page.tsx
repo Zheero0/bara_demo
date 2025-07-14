@@ -277,12 +277,12 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
       <ScrollArea className="flex-1">
         <CardHeader>
           <div className="flex justify-between items-start">
-             <div className="flex items-center gap-2">
+             <div className="flex items-center gap-2 min-w-0">
                 <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
-                <div>
-                    <CardTitle className="text-xl font-headline">{job.title}</CardTitle>
+                <div className="min-w-0">
+                    <CardTitle className="text-xl font-headline break-words">{job.title}</CardTitle>
                     <CardDescription className="mt-1">
                         <div className="flex items-center gap-2 text-xs">
                             <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
