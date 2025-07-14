@@ -8,6 +8,7 @@ import {
   MessageSquare,
   Search,
   Settings,
+  Sparkles,
   User,
   Users,
   Briefcase
@@ -138,7 +139,10 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="mt-auto p-4">
             <Card>
               <CardHeader className="p-2 pt-0 md:p-4">
-                <CardTitle className="font-headline text-base">Upgrade to Pro</CardTitle>
+                <CardTitle className="font-headline text-base flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-primary" />
+                  Upgrade to Pro
+                </CardTitle>
                 <CardDescription>
                   Unlock all features and get unlimited access to our support
                   team.
@@ -196,7 +200,10 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
               <div className="mt-auto">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-headline text-base">Upgrade to Pro</CardTitle>
+                    <CardTitle className="font-headline text-base flex items-center gap-2">
+                       <Sparkles className="w-4 h-4 text-primary" />
+                       Upgrade to Pro
+                    </CardTitle>
                     <CardDescription>
                       Unlock all features and get unlimited access to our
                       support team.
