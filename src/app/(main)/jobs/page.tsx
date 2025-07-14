@@ -44,7 +44,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, DollarSign, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -162,7 +162,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
               name="price"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Price ($)</FormLabel>
+                  <FormLabel>Price (£)</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="e.g. 5000" {...field} />
                   </FormControl>
@@ -299,10 +299,10 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
               <h3 className="font-semibold text-xs font-headline tracking-wider uppercase text-muted-foreground">Job Details</h3>
               <div className="border rounded-lg space-y-4 p-4">
                   <div className="flex items-center space-x-2">
-                      <DollarSign className="w-4 h-4 text-primary shrink-0" />
+                      <PoundSterling className="w-4 h-4 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
-                          <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
+                          <p className="font-semibold text-sm">£{job.price.toLocaleString()}</p>
                       </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -479,7 +479,7 @@ function JobsContent() {
                                          <p className="text-sm text-muted-foreground pr-4 mt-1">
                                             {truncateText(job.description, 25)}
                                         </p>
-                                        <div className="text-lg font-bold text-primary whitespace-nowrap">${job.price.toLocaleString()}</div>
+                                        <div className="text-lg font-bold text-primary whitespace-nowrap">£{job.price.toLocaleString()}</div>
                                     </div>
                                 </CardContent>
                             </Card>

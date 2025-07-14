@@ -18,9 +18,9 @@ import {
 import { Separator } from "@/components/ui/separator"
 
 const billingHistory = [
-  { invoice: "INV001", date: "Jan 20, 2024", amount: "$99.00", status: "Paid" },
-  { invoice: "INV002", date: "Feb 20, 2024", amount: "$99.00", status: "Paid" },
-  { invoice: "INV003", date: "Mar 20, 2024", amount: "$99.00", status: "Pending" },
+  { invoice: "INV001", date: "Jan 20, 2024", amount: "£99.00", status: "Paid" },
+  { invoice: "INV002", date: "Feb 20, 2024", amount: "£99.00", status: "Paid" },
+  { invoice: "INV003", date: "Mar 20, 2024", amount: "£99.00", status: "Pending" },
 ]
 
 export default function BillingPage() {
@@ -41,7 +41,7 @@ export default function BillingPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1">
-                <p className="text-2xl font-bold">$99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                <p className="text-2xl font-bold">£99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
                 <p className="text-sm text-muted-foreground">Billed monthly. Your next payment is on July 20, 2024.</p>
             </div>
             <Separator />

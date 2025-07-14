@@ -172,7 +172,7 @@ export default function ProfilePage() {
                                 </CardContent>
                                 <Separator className="my-4" />
                                 <CardFooter className="flex justify-between items-center">
-                                    <div className="text-lg font-bold text-primary">${job.price.toLocaleString()}</div>
+                                    <div className="text-lg font-bold text-primary">£{job.price.toLocaleString()}</div>
                                     <Button asChild variant="outline">
                                         <Link href={`/job/${job.id}`}>View Job</Link>
                                     </Button>
