@@ -78,6 +78,9 @@ const jobSchema = z.object({
 });
 
 const JOB_CATEGORIES = [
+    "Web Development",
+    "Design & Creative",
+    "Writing & Translation",
     "DIY & Home Improvement",
     "Cleaning Services",
     "Tutoring & Education",
@@ -85,7 +88,6 @@ const JOB_CATEGORIES = [
     "Moving & Delivery",
     "Events & Photography",
     "Personal Care & Wellness",
-    "Writing & Translation",
     "Other"
 ];
 
@@ -473,6 +475,8 @@ function JobsContent() {
   const searchQuery = searchParams.get('q') || '';
   const [locationFilter, setLocationFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('All Categories');
+  const [priceFilter, setPriceFilter] = useState('All Prices');
+  const [jobTypeFilter, setJobTypeFilter] = useState('All Types');
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -505,9 +509,22 @@ function JobsContent() {
         ? job.category === categoryFilter
         : true;
         
-      return matchesSearch && matchesLocation && matchesCategory;
+      const matchesJobType = jobTypeFilter !== 'All Types'
+        ? (job.location?.toLowerCase() === 'remote' && jobTypeFilter === 'Remote') || 
+          (job.location?.toLowerCase() !== 'remote' && jobTypeFilter === 'On-site')
+        : true;
+
+      const matchesPrice = priceFilter !== 'All Prices'
+        ? (() => {
+            const [min, max] = priceFilter.split('-').map(Number);
+            if (max) return job.price >= min && job.price <= max;
+            return job.price >= min;
+          })()
+        : true;
+
+      return matchesSearch && matchesLocation && matchesCategory && matchesJobType && matchesPrice;
     });
-  }, [allJobs, searchQuery, locationFilter, categoryFilter]);
+  }, [allJobs, searchQuery, locationFilter, categoryFilter, jobTypeFilter, priceFilter]);
 
   useEffect(() => {
     if (!selectedJob && filteredJobs.length > 0) {
@@ -559,6 +576,36 @@ function JobsContent() {
                         ))}
                     </SelectContent>
                     </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="price">Price</Label>
+                        <Select value={priceFilter} onValueChange={setPriceFilter}>
+                            <SelectTrigger id="price">
+                                <SelectValue placeholder="All Prices" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="All Prices">All Prices</SelectItem>
+                                <SelectItem value="0-100">£0 - £100</SelectItem>
+                                <SelectItem value="100-500">£100 - £500</SelectItem>
+                                <SelectItem value="500-1000">£500 - £1000</SelectItem>
+                                <SelectItem value="1000">£1000+</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <div className="grid gap-2">
+                        <Label htmlFor="job-type">Job Type</Label>
+                        <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+                            <SelectTrigger id="job-type">
+                                <SelectValue placeholder="All Types" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="All Types">All Types</SelectItem>
+                                <SelectItem value="Remote">Remote</SelectItem>
+                                <SelectItem value="On-site">On-site</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
             </div>
              <ScrollArea className="flex-1 -mr-6 pr-6">
@@ -640,3 +687,5 @@ export default function JobsPage() {
     </Suspense>
   )
 }
+
+    
