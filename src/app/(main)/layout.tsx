@@ -40,6 +40,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const unreadCount = useUnreadMessages(user?.uid);
 
   useEffect(() => {
@@ -164,7 +165,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
       </div>
       <div className="flex flex-col h-screen">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
-          <Sheet>
+          <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -178,11 +179,11 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
                 <Logo />
-                <NavLink href="/jobs" variant="mobile">
+                <NavLink href="/jobs" variant="mobile" onClick={() => setIsSheetOpen(false)}>
                   <Briefcase className="h-5 w-5" />
                   Jobs
                 </NavLink>
-                <NavLink href="/chat" variant="mobile">
+                <NavLink href="/chat" variant="mobile" onClick={() => setIsSheetOpen(false)}>
                   <MessageSquare className="h-5 w-5" />
                   Chat
                   {unreadCount > 0 && (
@@ -191,15 +192,15 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
                     </Badge>
                   )}
                 </NavLink>
-                <NavLink href="/connections" variant="mobile">
+                <NavLink href="/connections" variant="mobile" onClick={() => setIsSheetOpen(false)}>
                   <Users className="h-5 w-5" />
                   Connections
                 </NavLink>
-                <NavLink href="/profile" variant="mobile">
+                <NavLink href="/profile" variant="mobile" onClick={() => setIsSheetOpen(false)}>
                   <User className="h-5 w-5" />
                   Profile
                 </NavLink>
-                 <NavLink href="/settings" variant="mobile">
+                 <NavLink href="/settings" variant="mobile" onClick={() => setIsSheetOpen(false)}>
                   <Settings className="h-5 w-5" />
                   Settings
                 </NavLink>
