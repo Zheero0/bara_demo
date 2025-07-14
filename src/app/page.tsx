@@ -5,13 +5,54 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, MessagesSquare, Users, CheckCircle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Logo from '@/components/logo';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
 
 export default function LandingPage() {
   const { user, loading } = useAuth();
+
+  const plans = [
+    {
+        name: 'Free',
+        price: '£0',
+        priceDescription: '/month',
+        description: 'For those just getting started.',
+        features: [
+            'Browse all job postings',
+            'Apply to 3 jobs per month',
+            'Basic profile customization',
+        ],
+        buttonText: 'Get Started',
+        variant: 'outline'
+    },
+    {
+        name: 'Pro Monthly',
+        price: '£25',
+        priceDescription: '/month',
+        description: 'For professionals ready to level up.',
+        features: [
+            'Apply to unlimited jobs',
+            'Get the "Bara Pro" badge',
+            'Priority support',
+            'Full access to communication tools'
+        ],
+        buttonText: 'Go Pro',
+        isPrimary: true
+    },
+    {
+        name: 'Pro Annual',
+        price: '£250',
+        priceDescription: '/year',
+        description: 'For committed professionals.',
+        features: [
+            'All features from Pro Monthly',
+            'Save £50 (2 months free)',
+            'Top priority support',
+        ],
+        buttonText: 'Go Pro Annual',
+        variant: 'outline'
+    }
+];
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
@@ -23,9 +64,6 @@ export default function LandingPage() {
           </Link>
            <Link href="#pricing" className="text-sm font-medium hover:underline underline-offset-4">
             Pricing
-          </Link>
-          <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4">
-            Contact
           </Link>
           {loading ? null : user ? (
             <Link href="/jobs">
@@ -112,75 +150,40 @@ export default function LandingPage() {
              <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                 <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">Simple, Transparent Pricing</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                    One plan, all features. Become a Pro and unlock your full potential.
+                    Choose the plan that's right for you.
                 </p>
             </div>
-             <div className="mx-auto flex justify-center">
-                 <Card className="w-full max-w-md shadow-lg">
-                    <CardHeader className="text-center">
-                        <CardTitle className="text-2xl font-headline">Bara Pro</CardTitle>
-                        <CardDescription>Full access to the platform.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center">
-                        <div className="my-4">
-                            <span className="text-5xl font-bold">£99</span>
-                            <span className="text-muted-foreground">/month</span>
-                        </div>
-                        <ul className="space-y-3 w-full text-left my-4">
-                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Apply to unlimited jobs</li>
-                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Get the "Bara Pro" badge</li>
-                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Priority support</li>
-                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Full access to communication tools</li>
-                        </ul>
-                         <Link href="/signup" className="w-full">
-                            <Button className="w-full" size="lg">Get Started</Button>
-                        </Link>
-                    </CardContent>
-                </Card>
+             <div className="grid gap-8 lg:grid-cols-3">
+                 {plans.map((plan) => (
+                    <Card key={plan.name} className={cn("flex flex-col", plan.isPrimary ? "ring-2 ring-primary" : "")}>
+                        <CardHeader>
+                            <CardTitle className="font-headline text-2xl">{plan.name}</CardTitle>
+                            <CardDescription>{plan.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-col flex-1 justify-between">
+                            <div>
+                                <div className="mb-6">
+                                    <span className="text-5xl font-bold">{plan.price}</span>
+                                    <span className="text-muted-foreground">{plan.priceDescription}</span>
+                                </div>
+                                <ul className="space-y-3">
+                                    {plan.features.map((feature, i) => (
+                                        <li key={i} className="flex items-center gap-2">
+                                            <CheckCircle className="text-green-500 w-5 h-5" />
+                                            {feature}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <Link href="/signup" className="w-full mt-8">
+                                <Button className="w-full" size="lg" variant={plan.isPrimary ? 'default' : 'outline'}>{plan.buttonText}</Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+                 ))}
              </div>
           </div>
         </section>
-
-        <section id="contact" className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-              <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">Get In Touch</h2>
-              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                Have questions or want to learn more? Drop us a line.
-              </p>
-            </div>
-            <div className="mx-auto w-full max-w-2xl">
-              <Card>
-                <CardContent className="p-6">
-                  <form className="grid gap-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="grid gap-2">
-                        <Label htmlFor="first-name">First name</Label>
-                        <Input id="first-name" placeholder="John" required />
-                      </div>
-                      <div className="grid gap-2">
-                        <Label htmlFor="last-name">Last name</Label>
-                        <Input id="last-name" placeholder="Doe" required />
-                      </div>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="john.doe@example.com" required />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="message">Message</Label>
-                      <Textarea id="message" placeholder="Type your message here." required className="min-h-[120px]" />
-                    </div>
-                    <Button type="submit" className="w-full">
-                      Send Message
-                    </Button>
-                  </form>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </section>
-
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">&copy; 2024 barabara Inc. All rights reserved.</p>
@@ -196,4 +199,3 @@ export default function LandingPage() {
     </div>
   );
 }
-

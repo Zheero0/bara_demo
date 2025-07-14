@@ -1,3 +1,4 @@
+
 import { type Timestamp } from "firebase/firestore";
 
 export type User = {
@@ -8,6 +9,7 @@ export type User = {
   headline: string;
   location: string;
   about: string;
+  plan: 'Free' | 'Pro Monthly' | 'Pro Annual';
   connections?: number; // Make optional as we're not tracking it yet
 };
 
@@ -52,11 +54,11 @@ export type Conversation = {
 
 
 export const mockUsers: User[] = [
-  { id: '1', email: 'alice@example.com', name: 'Alice Johnson', avatar: 'https://placehold.co/100x100.png', headline: 'Full-Stack Developer | React & Node.js', location: 'San Francisco, CA', connections: 152, about: 'Passionate developer with 5+ years of experience building web applications.' },
-  { id: '2', email: 'bob@example.com', name: 'Bob Williams', avatar: 'https://placehold.co/100x100.png', headline: 'UI/UX Designer | Figma & Sketch', location: 'New York, NY', connections: 89, about: 'Creating intuitive and beautiful user experiences is my passion.' },
-  { id: '3', email: 'charlie@example.com', name: 'Charlie Brown', avatar: 'https://placehold.co/100x100.png', headline: 'Project Manager | Agile & Scrum Master', location: 'Chicago, IL', connections: 230, about: 'Experienced PM focused on delivering high-quality projects on time.' },
-  { id: '4', email: 'diana@example.com', name: 'Diana Prince', avatar: 'https://placehold.co/100x100.png', headline: 'Mobile Developer | iOS & Swift', location: 'Austin, TX', connections: 110, about: 'Building performant and user-friendly mobile applications.' },
-  { id: '5', email: 'ethan@example.com', name: 'Ethan Hunt', avatar: 'https://placehold.co/100x100.png', headline: 'DevOps Engineer | AWS & Kubernetes', location: 'Seattle, WA', connections: 180, about: 'Automating infrastructure and scaling systems for growth.' },
+  { id: '1', email: 'alice@example.com', name: 'Alice Johnson', avatar: 'https://placehold.co/100x100.png', headline: 'Full-Stack Developer | React & Node.js', location: 'San Francisco, CA', connections: 152, about: 'Passionate developer with 5+ years of experience building web applications.', plan: 'Pro Annual' },
+  { id: '2', email: 'bob@example.com', name: 'Bob Williams', avatar: 'https://placehold.co/100x100.png', headline: 'UI/UX Designer | Figma & Sketch', location: 'New York, NY', connections: 89, about: 'Creating intuitive and beautiful user experiences is my passion.', plan: 'Pro Monthly' },
+  { id: '3', email: 'charlie@example.com', name: 'Charlie Brown', avatar: 'https://placehold.co/100x100.png', headline: 'Project Manager | Agile & Scrum Master', location: 'Chicago, IL', connections: 230, about: 'Experienced PM focused on delivering high-quality projects on time.', plan: 'Free' },
+  { id: '4', email: 'diana@example.com', name: 'Diana Prince', avatar: 'https://placehold.co/100x100.png', headline: 'Mobile Developer | iOS & Swift', location: 'Austin, TX', connections: 110, about: 'Building performant and user-friendly mobile applications.', plan: 'Free' },
+  { id: '5', email: 'ethan@example.com', name: 'Ethan Hunt', avatar: 'https://placehold.co/100x100.png', headline: 'DevOps Engineer | AWS & Kubernetes', location: 'Seattle, WA', connections: 180, about: 'Pro Annual', plan: 'Pro Annual' },
 ];
 
 export const mockJobs: Omit<Job, 'id' | 'postedBy'>[] = [
