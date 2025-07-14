@@ -21,6 +21,7 @@ export type Job = {
   location: string;
   jobType: 'On-site' | 'Remote';
   description: string;
+  status: 'Open' | 'Closed';
   postedBy: {
     uid: string; // Keep track of the poster's user ID
     name: string;
@@ -63,7 +64,7 @@ export const mockUsers: User[] = [
   { id: '5', email: 'ethan@example.com', name: 'Ethan Hunt', avatar: 'https://placehold.co/100x100.png', headline: 'DevOps Engineer | AWS & Kubernetes', location: 'Seattle, WA', connections: 180, about: 'Pro Annual', plan: 'Pro Annual' },
 ];
 
-export const mockJobs: Omit<Job, 'id' | 'postedBy' | 'createdAt'>[] = [
+export const mockJobs: Omit<Job, 'id' | 'postedBy' | 'createdAt' | 'status'>[] = [
   { title: 'E-commerce Website Redesign', category: 'Web Development', price: 5000, location: 'Remote', jobType: 'Remote', description: 'We are looking for an experienced developer to redesign our Shopify store. Must have a strong portfolio.' },
   { title: 'Mobile App UI/UX Design', category: 'Design', price: 3500, location: 'London', jobType: 'On-site', description: 'Design a new mobile application for a fitness startup. Experience with Figma is required.' },
   { title: 'Cloud Infrastructure Setup', category: 'DevOps', price: 7000, location: 'Remote', jobType: 'Remote', description: 'Setup a scalable and secure cloud infrastructure on AWS for our growing SaaS platform.' },

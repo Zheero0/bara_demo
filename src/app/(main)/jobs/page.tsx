@@ -78,10 +78,15 @@ const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   category: z.string().min(1, "Please select a category."),
   price: z.coerce.number().min(1, "Price must be greater than 0."),
-  jobType: z.string().min(1, "Please select a job type."),
+  jobType: z.enum(['On-site', 'Remote']).or(z.string().min(1, "Please select a job type.")),
   location: z.string().min(2, "Please specify a location.").max(50, "Location must be 50 characters or less."),
   description: z.string().min(20, "Description must be at least 20 characters long."),
 });
+
+const manageJobSchema = jobSchema.extend({
+  status: z.enum(['Open', 'Closed']),
+});
+
 
 const JOB_CATEGORIES = [
     "Web Development",
@@ -176,6 +181,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
       const jobsCollection = collection(db, "jobs");
       await addDoc(jobsCollection, {
         ...values,
+        status: 'Open', // Default status
         postedBy: {
           uid: user.uid,
           name: user.displayName || "Anonymous",
@@ -308,6 +314,107 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
             />
             <DialogFooter>
               <Button type="submit" disabled={loading}>{loading ? "Posting..." : "Post Job"}</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ManageJobDialog({ job }: { job: Job }) {
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const form = useForm<z.infer<typeof manageJobSchema>>({
+    resolver: zodResolver(manageJobSchema),
+    defaultValues: {
+      ...job,
+    },
+  });
+
+  async function onSubmit(values: z.infer<typeof manageJobSchema>) {
+    setLoading(true);
+    try {
+      const jobRef = doc(db, "jobs", job.id);
+      await updateDoc(jobRef, values);
+      toast({ title: "Job Updated!", description: "Your job details have been saved." });
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error updating job: ", error);
+      toast({ title: "Error", description: "There was an error updating your job.", variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <DialogTrigger asChild>
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <Settings className="mr-2 h-4 w-4" />
+            Manage Job
+        </DropdownMenuItem>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Manage Job</DialogTitle>
+          <DialogDescription>
+            Update the details for your job posting.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+             <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Open">Open</SelectItem>
+                      <SelectItem value="Closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea className="resize-none" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" disabled={loading}>{loading ? "Saving..." : "Save Changes"}</Button>
             </DialogFooter>
           </form>
         </Form>
@@ -478,8 +585,8 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
       </ScrollArea>
       <CardFooter className="border-t pt-4">
           {!isJobPoster && (
-            <Button onClick={handleApply} size="sm" disabled={applying || !user}>
-              {applying ? 'Starting conversation...' : 'Apply for this Job'}
+            <Button onClick={handleApply} size="sm" disabled={applying || !user || job.status === 'Closed'}>
+              {job.status === 'Closed' ? 'Job Closed' : applying ? 'Starting conversation...' : 'Apply for this Job'}
             </Button>
           )}
       </CardFooter>
@@ -675,7 +782,10 @@ function JobsContent() {
                                 <CardHeader className="p-3 pt-3 pb-2">
                                     <div className="flex items-start justify-between">
                                         <div>
-                                            <CardTitle className="font-headline text-base mb-1 line-clamp-1">{job.title}</CardTitle>
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <CardTitle className="font-headline text-base line-clamp-1">{job.title}</CardTitle>
+                                                <Badge variant={job.status === 'Open' ? 'default' : 'secondary'} className={cn(job.status === 'Open' && 'bg-green-600')}>{job.status}</Badge>
+                                            </div>
                                             <CardDescription className="flex items-center gap-2 text-xs">
                                                 <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
                                                 {job.postedBy.name}
@@ -689,10 +799,7 @@ function JobsContent() {
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
                                                 {user?.uid === job.postedBy.uid ? (
-                                                    <DropdownMenuItem>
-                                                        <Settings className="mr-2 h-4 w-4" />
-                                                        Manage Job
-                                                    </DropdownMenuItem>
+                                                   <ManageJobDialog job={job} />
                                                 ) : (
                                                     <DropdownMenuItem>
                                                         <Flag className="mr-2 h-4 w-4" />
