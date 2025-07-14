@@ -19,9 +19,9 @@ import { useAuth } from "@/hooks/use-auth"
 import Link from "next/link"
 
 export function UserNav() {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
 
-  if (!user) {
+  if (!user || !profile) {
     return null;
   }
 
@@ -30,15 +30,15 @@ export function UserNav() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-9 w-9">
-            <AvatarImage src={user.photoURL || "/avatars/01.png"} alt={user.displayName || "User"} />
-            <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+            <AvatarImage src={profile.avatar || "/avatars/01.png"} alt={profile.name || "User"} />
+            <AvatarFallback>{profile.name?.charAt(0) || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{user.displayName || "User"}</p>
+            <p className="text-sm font-medium leading-none">{profile.name || "User"}</p>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>

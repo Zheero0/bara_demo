@@ -1,12 +1,11 @@
 
 'use client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { currentUser, type Job } from "@/lib/data";
+import { type Job } from "@/lib/data";
 import { Mail, MapPin, UserPlus } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,51 +14,76 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, profile, loading: authLoading } = useAuth();
   const [userJobs, setUserJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // For display purposes, we'll still use the mock currentUser for the profile header
-  // In a real app, you'd fetch this based on the authenticated user's ID
-  const displayUser = currentUser; 
+  const [jobsLoading, setJobsLoading] = useState(true);
   
   useEffect(() => {
     if (user?.displayName) {
-        setLoading(true);
+        setJobsLoading(true);
         const jobsQuery = query(collection(db, "jobs"), where("postedBy.name", "==", user.displayName));
         const unsubscribe = onSnapshot(jobsQuery, (snapshot) => {
             const jobsData: Job[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
             setUserJobs(jobsData);
-            setLoading(false);
+            setJobsLoading(false);
+        }, (error) => {
+          console.error("Error fetching user jobs: ", error);
+          setJobsLoading(false);
         });
         return () => unsubscribe();
-    } else {
-      // If no user is logged in, or they don't have a displayName, don't fetch jobs
-      setLoading(false);
+    } else if (!authLoading) {
+      // If user is loaded and has no displayName, stop loading
+      setJobsLoading(false);
     }
-  }, [user]);
+  }, [user, authLoading]);
+
+  if (authLoading || !profile) {
+    return (
+      <div className="flex flex-col gap-6">
+        <Card>
+            <CardHeader className="relative h-32 md:h-48 bg-muted rounded-t-lg">
+                 <Skeleton className="absolute inset-0" />
+                 <Skeleton className="absolute -bottom-12 left-6 w-24 h-24 rounded-full border-4 border-background" />
+            </CardHeader>
+             <CardContent className="mt-16">
+                 <Skeleton className="h-8 w-1/3 mb-2" />
+                 <Skeleton className="h-5 w-1/2 mb-4" />
+                 <div className="flex items-center gap-4">
+                     <Skeleton className="h-5 w-1/4" />
+                     <Skeleton className="h-5 w-1/4" />
+                 </div>
+             </CardContent>
+        </Card>
+         <div className="space-y-4">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="relative h-32 md:h-48 bg-muted rounded-t-lg">
-          <div data-ai-hint="banner background" className="absolute inset-0 bg-gradient-to-r from-blue-100 to-purple-100" />
+          <div data-ai-hint="banner background" className="absolute inset-0 bg-gradient-to-r from-purple-100 to-indigo-100" />
           <Avatar className="absolute -bottom-12 left-6 w-24 h-24 border-4 border-background">
-            <AvatarImage src={displayUser.avatar} />
-            <AvatarFallback>{displayUser.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={profile.avatar} />
+            <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </CardHeader>
         <CardContent className="mt-16">
           <div className="flex flex-col md:flex-row justify-between items-start">
             <div>
-              <h1 className="text-2xl font-headline font-bold">{displayUser.name}</h1>
-              <p className="text-muted-foreground">{displayUser.headline}</p>
+              <h1 className="text-2xl font-headline font-bold">{profile.name}</h1>
+              <p className="text-muted-foreground">{profile.headline}</p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
-                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {displayUser.location}</span>
-                <span>{displayUser.connections} connections</span>
+                <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.location || "No location specified"}</span>
+                {/* Connections count could be a future feature */}
               </div>
             </div>
             <div className="flex gap-2 mt-4 md:mt-0">
@@ -79,10 +103,10 @@ export default function ProfilePage() {
         <TabsContent value="about">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline">About {displayUser.name}</CardTitle>
+                    <CardTitle className="font-headline">About {profile.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-muted-foreground">{displayUser.about}</p>
+                    <p className="text-muted-foreground whitespace-pre-wrap">{profile.about || "This user hasn't written an about section yet."}</p>
                 </CardContent>
             </Card>
         </TabsContent>
@@ -90,10 +114,10 @@ export default function ProfilePage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Active Jobs</CardTitle>
-                    <CardDescription>Jobs posted by {user?.displayName || 'this user'}.</CardDescription>
+                    <CardDescription>Jobs posted by {profile.name}.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    {loading ? (
+                    {jobsLoading ? (
                         Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-48 w-full" />)
                     ) : userJobs.length > 0 ? (
                         userJobs.map((job) => (
@@ -136,7 +160,7 @@ export default function ProfilePage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="font-headline">Reviews</CardTitle>
-                    <CardDescription>What others are saying about {displayUser.name}.</CardDescription>
+                    <CardDescription>What others are saying about {profile.name}.</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center text-muted-foreground py-12">
                     <p>No reviews yet.</p>

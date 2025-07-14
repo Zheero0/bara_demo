@@ -1,3 +1,5 @@
+
+'use client';
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -9,13 +11,93 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { currentUser } from "@/lib/data"
+import { useAuth } from "@/hooks/use-auth"
+import { z } from "zod"
+import { useForm, Controller } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useToast } from "@/hooks/use-toast"
+import { doc, setDoc, updateProfile as updateFirebaseProfile } from "firebase/firestore"
+import { db, auth } from "@/lib/firebase"
+import { useState } from "react"
+import { Skeleton } from "@/components/ui/skeleton";
+
+const profileSchema = z.object({
+  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  headline: z.string().max(100, { message: "Headline must be 100 characters or less." }).optional(),
+  location: z.string().max(50, { message: "Location must be 50 characters or less." }).optional(),
+  about: z.string().max(500, { message: "About section must be 500 characters or less." }).optional(),
+});
+
 
 export default function SettingsPage() {
+  const { user, profile, loading: authLoading, reloadProfile } = useAuth();
+  const { toast } = useToast();
+  const [formLoading, setFormLoading] = useState(false);
+
+  const form = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    values: { // Use values instead of defaultValues to reflect live data
+        name: profile?.name || user?.displayName || "",
+        headline: profile?.headline || "",
+        location: profile?.location || "",
+        about: profile?.about || "",
+    },
+    // reValidateMode: "onChange",
+  });
+
+  async function onSubmit(values: z.infer<typeof profileSchema>) {
+    if (!user) {
+        toast({ title: "Error", description: "You must be logged in to update your profile.", variant: "destructive" });
+        return;
+    }
+    setFormLoading(true);
+    try {
+        const userRef = doc(db, "users", user.uid);
+        // We use setDoc with merge:true to create the document if it doesn't exist, or update it if it does.
+        await setDoc(userRef, {
+            ...values,
+            email: user.email // ensure email is always stored
+        }, { merge: true });
+
+        // Also update the display name in Firebase Auth profile itself
+        if (auth.currentUser && auth.currentUser.displayName !== values.name) {
+             // This is a native Firebase function, not the one from our hook
+             await updateFirebaseProfile(auth.currentUser, { displayName: values.name });
+        }
+
+        toast({ title: "Profile Updated", description: "Your profile has been saved successfully." });
+        reloadProfile(); // Refresh the profile data in our auth context
+    } catch (error) {
+        console.error("Error updating profile: ", error);
+        toast({ title: "Error", description: "Could not update your profile. Please try again.", variant: "destructive" });
+    } finally {
+        setFormLoading(false);
+    }
+  }
+
+  if (authLoading) {
+      return (
+           <Card>
+                <CardHeader>
+                    <Skeleton className="h-6 w-1/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </CardHeader>
+                <CardContent className="space-y-4">
+                     <Skeleton className="h-10 w-full" />
+                     <Skeleton className="h-10 w-full" />
+                     <Skeleton className="h-24 w-full" />
+                </CardContent>
+                <CardFooter className="border-t px-6 py-4">
+                    <Skeleton className="h-10 w-24" />
+                </CardFooter>
+            </Card>
+      )
+  }
+
   return (
     <>
       <div className="mb-4">
@@ -33,36 +115,76 @@ export default function SettingsPage() {
         </TabsList>
 
         <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>Public Profile</CardTitle>
-              <CardDescription>
-                Make changes to your public profile. This will be displayed to
-                other users.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" defaultValue={currentUser.name} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="headline">Headline</Label>
-                <Input id="headline" defaultValue={currentUser.headline} />
-              </div>
-               <div className="grid gap-2">
-                <Label htmlFor="location">Location</Label>
-                <Input id="location" defaultValue={currentUser.location} />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="about">About</Label>
-                <Textarea id="about" defaultValue={currentUser.about} rows={5} />
-              </div>
-            </CardContent>
-            <CardFooter className="border-t px-6 py-4">
-              <Button>Save</Button>
-            </CardFooter>
-          </Card>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)}>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Public Profile</CardTitle>
+                  <CardDescription>
+                    Make changes to your public profile. This will be displayed to
+                    other users.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Your full name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="headline"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Headline</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Full-Stack Developer | React & Node.js" {...field} />
+                        </FormControl>
+                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                           <Input placeholder="e.g. San Francisco, CA" {...field} />
+                        </FormControl>
+                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                   <FormField
+                    control={form.control}
+                    name="about"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>About</FormLabel>
+                        <FormControl>
+                           <Textarea placeholder="Tell us a little bit about yourself." rows={5} {...field} />
+                        </FormControl>
+                         <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+                <CardFooter className="border-t px-6 py-4">
+                  <Button type="submit" disabled={formLoading}>{formLoading ? "Saving..." : "Save"}</Button>
+                </CardFooter>
+              </Card>
+            </form>
+          </Form>
         </TabsContent>
 
         <TabsContent value="account">
@@ -71,12 +193,12 @@ export default function SettingsPage() {
               <CardTitle>Account</CardTitle>
               <CardDescription>
                 Manage your account settings.
-              </CardDescription>
+              </Description>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue="alice@example.com" />
+                <Input id="email" type="email" defaultValue={user?.email || ""} disabled />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">New Password</Label>
