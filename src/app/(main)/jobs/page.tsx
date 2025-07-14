@@ -227,7 +227,6 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
-                createdAt: serverTimestamp(),
                 lastMessage: {
                     text: initialMessage,
                     senderId: user.uid,
