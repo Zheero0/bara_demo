@@ -21,7 +21,6 @@ import { type Job } from "@/lib/data"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
-import { Slider } from "@/components/ui/slider"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState, useMemo, Suspense } from "react"
 import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc, getDoc as getFirestoreDoc } from "firebase/firestore"
@@ -44,7 +43,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -60,6 +59,7 @@ const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   category: z.string().min(1, "Please select a category."),
   price: z.coerce.number().min(1, "Price must be greater than 0."),
+  location: z.string().min(2, "Please specify a location or 'Remote'.").max(50, "Location must be 50 characters or less."),
   description: z.string().min(20, "Description must be at least 20 characters long."),
 });
 
@@ -74,6 +74,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
       title: "",
       category: "",
       price: 0,
+      location: "",
       description: "",
     },
   });
@@ -158,19 +159,34 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
                 </FormItem>
               )}
             />
-             <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price (£)</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g. 5000" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="grid grid-cols-2 gap-4">
+                 <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price (£)</FormLabel>
+                      <FormControl>
+                        <Input type="number" placeholder="e.g. 5000" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. Manchester or Remote" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
             <FormField
               control={form.control}
               name="description"
@@ -227,13 +243,11 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
-            // 1. Create a new conversation document reference with a unique ID
             const newConversationRef = doc(collection(db, 'conversations'));
             conversationId = newConversationRef.id;
 
             const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
 
-            // 2. Add the first message to the subcollection
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             const newMessageDoc = await addDoc(messagesRef, {
                 senderId: user.uid,
@@ -241,18 +255,16 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                 timestamp: serverTimestamp(),
             });
 
-            // 3. Get the timestamp from the newly created message
             const newMessageSnap = await getFirestoreDoc(newMessageDoc);
             const newMessageData = newMessageSnap.data();
 
-            // 4. Set the initial conversation data, including the lastMessage
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
                 lastMessage: {
                     text: initialMessage,
                     senderId: user.uid,
-                    timestamp: newMessageData?.timestamp || serverTimestamp(), // Use serverTimestamp as fallback
+                    timestamp: newMessageData?.timestamp || serverTimestamp(),
                 }
             });
         }
@@ -327,6 +339,13 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                           <p className="font-semibold text-sm">£{job.price.toLocaleString()}</p>
                       </div>
                   </div>
+                   <div className="flex items-center space-x-2">
+                      <MapPin className="w-4 h-4 text-primary shrink-0" />
+                      <div>
+                          <p className="text-xs text-muted-foreground">Location</p>
+                          <p className="font-semibold text-sm">{job.location}</p>
+                      </div>
+                  </div>
                   <div className="flex items-center space-x-2">
                       <Briefcase className="w-4 h-4 text-primary shrink-0" />
                       <div>
@@ -375,7 +394,8 @@ function EmptyJobView() {
 function JobsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
-  const { user } = useAuth();
+  const [locationFilter, setLocationFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All Categories');
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -396,18 +416,26 @@ function JobsContent() {
   }, [loading]);
 
   const filteredJobs = useMemo(() => {
-    if (!searchQuery) return allJobs;
-    return allJobs.filter(job =>
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.description.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [allJobs, searchQuery]);
+    return allJobs.filter(job => {
+      const matchesSearch = searchQuery 
+        ? job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+          job.description.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+      const matchesLocation = locationFilter 
+        ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
+        : true;
+      const matchesCategory = categoryFilter !== 'All Categories'
+        ? job.category === categoryFilter
+        : true;
+        
+      return matchesSearch && matchesLocation && matchesCategory;
+    });
+  }, [allJobs, searchQuery, locationFilter, categoryFilter]);
 
   useEffect(() => {
     if (!selectedJob && filteredJobs.length > 0) {
       setSelectedJob(filteredJobs[0]);
     } else if (selectedJob && !filteredJobs.some(j => j.id === selectedJob.id)) {
-      // If the selected job is not in the filtered list, select the first one or null
       setSelectedJob(filteredJobs[0] || null);
     }
   }, [filteredJobs, selectedJob]);
@@ -436,20 +464,30 @@ function JobsContent() {
                     <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
                 </div>
             </div>
-            <div className="border shadow-sm rounded-lg p-4">
-                {/* Filters can go here */}
+            <div className="border shadow-sm rounded-lg p-4 space-y-4">
+                 <div className="grid gap-2">
+                    <Label htmlFor="location">Location</Label>
+                    <Input 
+                      id="location"
+                      placeholder="City or 'Remote'"
+                      value={locationFilter}
+                      onChange={(e) => setLocationFilter(e.target.value)}
+                    />
+                </div>
                  <div className="grid gap-2">
                     <Label htmlFor="category">Category</Label>
-                    <Select>
+                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                     <SelectTrigger id="category">
                         <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="web-dev">Web Development</SelectItem>
-                        <SelectItem value="design">Design</SelectItem>
-                        <SelectItem value="mobile-dev">Mobile Development</SelectItem>
-                        <SelectItem value="writing">Writing</SelectItem>
-                        <SelectItem value="devops">DevOps</SelectItem>
+                        <SelectItem value="All Categories">All Categories</SelectItem>
+                        <SelectItem value="Web Development">Web Development</SelectItem>
+                        <SelectItem value="Design">Design</SelectItem>
+                        <SelectItem value="Mobile Development">Mobile Development</SelectItem>
+                        <SelectItem value="Writing">Writing</SelectItem>
+                        <SelectItem value="DevOps">DevOps</SelectItem>
+                        <SelectItem value="Data Science">Data Science</SelectItem>
                     </SelectContent>
                     </Select>
                 </div>
@@ -516,6 +554,8 @@ function JobsContent() {
                 <Card><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
             ) : selectedJob ? (
                 <JobDetailView job={selectedJob} onBack={() => setMobileView('list')} />
+            ) : filteredJobs.length > 0 ? (
+                 <JobDetailView job={filteredJobs[0]} onBack={() => setMobileView('list')} />
             ) : (
                 <EmptyJobView />
             )}
@@ -531,5 +571,3 @@ export default function JobsPage() {
     </Suspense>
   )
 }
-
-    

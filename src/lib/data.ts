@@ -18,6 +18,7 @@ export type Job = {
   title: string;
   category: string;
   price: number;
+  location: string;
   description: string;
   postedBy: {
     uid: string; // Keep track of the poster's user ID
@@ -61,13 +62,13 @@ export const mockUsers: User[] = [
   { id: '5', email: 'ethan@example.com', name: 'Ethan Hunt', avatar: 'https://placehold.co/100x100.png', headline: 'DevOps Engineer | AWS & Kubernetes', location: 'Seattle, WA', connections: 180, about: 'Pro Annual', plan: 'Pro Annual' },
 ];
 
-export const mockJobs: Omit<Job, 'id' | 'postedBy'>[] = [
-  { title: 'E-commerce Website Redesign', category: 'Web Development', price: 5000, description: 'We are looking for an experienced developer to redesign our Shopify store. Must have a strong portfolio.' },
-  { title: 'Mobile App UI/UX Design', category: 'Design', price: 3500, description: 'Design a new mobile application for a fitness startup. Experience with Figma is required.' },
-  { title: 'Cloud Infrastructure Setup', category: 'DevOps', price: 7000, description: 'Setup a scalable and secure cloud infrastructure on AWS for our growing SaaS platform.' },
-  { title: 'Content Writer for Tech Blog', category: 'Writing', price: 1500, description: 'Write 4 high-quality blog posts per month about software development trends.' },
-  { title: 'React Native Developer for MVP', category: 'Mobile Development', price: 6000, description: 'Develop a cross-platform MVP for a new social networking app.' },
-  { title: 'Data Visualization Dashboard', category: 'Data Science', price: 4500, description: 'Create an interactive data dashboard using D3.js or a similar library to visualize sales data.' },
+export const mockJobs: Omit<Job, 'id' | 'postedBy' | 'createdAt'>[] = [
+  { title: 'E-commerce Website Redesign', category: 'Web Development', price: 5000, location: 'Remote', description: 'We are looking for an experienced developer to redesign our Shopify store. Must have a strong portfolio.' },
+  { title: 'Mobile App UI/UX Design', category: 'Design', price: 3500, location: 'London', description: 'Design a new mobile application for a fitness startup. Experience with Figma is required.' },
+  { title: 'Cloud Infrastructure Setup', category: 'DevOps', price: 7000, location: 'Remote', description: 'Setup a scalable and secure cloud infrastructure on AWS for our growing SaaS platform.' },
+  { title: 'Content Writer for Tech Blog', category: 'Writing', price: 1500, location: 'Manchester', description: 'Write 4 high-quality blog posts per month about software development trends.' },
+  { title: 'React Native Developer for MVP', category: 'Mobile Development', price: 6000, location: 'Remote', description: 'Develop a cross-platform MVP for a new social networking app.' },
+  { title: 'Data Visualization Dashboard', category: 'Data Science', price: 4500, location: 'Edinburgh', description: 'Create an interactive data dashboard using D3.js or a similar library to visualize sales data.' },
 ];
 
 export const connections: Connection[] = [

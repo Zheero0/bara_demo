@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Job, type User as ProfileData } from "@/lib/data";
-import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag, Edit } from "lucide-react";
+import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag, Edit, Briefcase } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -75,7 +75,6 @@ export default function ProfilePage() {
             const data = docSnap.data() as Omit<ProfileData, 'id'>;
             setProfile({ id: docSnap.id, ...data });
 
-            // Fetch jobs after profile is loaded
             setJobsLoading(true);
             const jobsQuery = query(collection(db, "jobs"), where("postedBy.uid", "==", docSnap.id));
             const unsubscribeJobs = onSnapshot(jobsQuery, (snapshot) => {
@@ -91,8 +90,7 @@ export default function ProfilePage() {
         } else {
             console.log("No such profile!");
             setProfile(null);
-            // Optionally redirect or show a "not found" page
-            // router.push('/404'); 
+            router.push('/jobs'); 
         }
         setProfileLoading(false);
     }, (error) => {
@@ -125,7 +123,6 @@ export default function ProfilePage() {
               <p className="text-muted-foreground">{profile.headline}</p>
               <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                 <span className="flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.location || "No location specified"}</span>
-                {/* Connections count could be a future feature */}
               </div>
             </div>
             <div className="flex gap-2 mt-4 md:mt-0">
@@ -191,14 +188,13 @@ export default function ProfilePage() {
                             <Card key={job.id}>
                                 <CardHeader>
                                     <div className="flex items-start justify-between">
-                                        <div>
-                                            <CardTitle className="font-headline text-lg mb-1">{job.title}</CardTitle>
-                                            <CardDescription className="flex items-center gap-2">
-                                                <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
-                                                {job.postedBy.name}
-                                            </CardDescription>
+                                        <div className="min-w-0">
+                                            <CardTitle className="font-headline text-lg mb-1 truncate">{job.title}</CardTitle>
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+                                                <span className="flex items-center gap-1.5"><Briefcase className="w-4 h-4" />{job.category}</span>
+                                                <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" />{job.location}</span>
+                                            </div>
                                         </div>
-                                        <Badge variant="secondary">{job.category}</Badge>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
@@ -210,7 +206,7 @@ export default function ProfilePage() {
                                 <CardFooter className="flex justify-between items-center">
                                     <div className="text-lg font-bold text-primary">£{job.price.toLocaleString()}</div>
                                     <Button asChild variant="outline">
-                                        <Link href={`/jobs`}>View Job</Link>
+                                        <Link href={`/jobs?jobId=${job.id}`}>View Job</Link>
                                     </Button>
                                 </CardFooter>
                             </Card>
@@ -238,5 +234,3 @@ export default function ProfilePage() {
     </div>
   )
 }
-
-    
