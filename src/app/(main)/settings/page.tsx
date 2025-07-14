@@ -19,7 +19,7 @@ import { z } from "zod"
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner";
 import { doc, setDoc } from "firebase/firestore";
 import { updateProfile as updateFirebaseProfile } from "firebase/auth";
 import { db, auth } from "@/lib/firebase"
@@ -37,7 +37,6 @@ const profileSchema = z.object({
 
 export default function SettingsPage() {
   const { user, profile, loading: authLoading, reloadProfile } = useAuth();
-  const { toast } = useToast();
   const [formLoading, setFormLoading] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -53,7 +52,7 @@ export default function SettingsPage() {
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
     if (!user) {
-        toast({ title: "Error", description: "You must be logged in to update your profile.", variant: "destructive" });
+        toast.error("Error", { description: "You must be logged in to update your profile." });
         return;
     }
     setFormLoading(true);
@@ -68,11 +67,11 @@ export default function SettingsPage() {
              await updateFirebaseProfile(auth.currentUser, { displayName: values.name });
         }
 
-        toast({ title: "Profile Updated", description: "Your profile has been saved successfully." });
+        toast.success("Profile Updated", { description: "Your profile has been saved successfully." });
         reloadProfile();
     } catch (error) {
         console.error("Error updating profile: ", error);
-        toast({ title: "Error", description: "Could not update your profile. Please try again.", variant: "destructive" });
+        toast.error("Error", { description: "Could not update your profile. Please try again." });
     } finally {
         setFormLoading(false);
     }

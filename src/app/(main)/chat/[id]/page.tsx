@@ -14,7 +14,7 @@ import { db } from "@/lib/firebase";
 import { doc, getDoc, collection, onSnapshot, addDoc, serverTimestamp, query, orderBy, updateDoc, deleteDoc } from "firebase/firestore";
 import { format } from 'date-fns';
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +27,6 @@ export default function ConversationPage() {
     const params = useParams();
     const conversationId = Array.isArray(params.id) ? params.id[0] : params.id;
     const { user, profile } = useAuth();
-    const { toast } = useToast();
 
     const [conversation, setConversation] = useState<any | null>(null);
     const [otherUser, setOtherUser] = useState<any | null>(null);
@@ -72,7 +71,7 @@ export default function ConversationPage() {
 
                     } catch (error) {
                         console.error("Error fetching conversation details:", error);
-                        toast({ title: "Error", description: "Could not load conversation details.", variant: "destructive" });
+                        toast.error("Error", { description: "Could not load conversation details." });
                     }
                 }
             } else {
@@ -98,7 +97,7 @@ export default function ConversationPage() {
             unsubscribeMessages();
         };
 
-    }, [conversationId, user, router, toast]);
+    }, [conversationId, user, router]);
     
      useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -135,7 +134,7 @@ export default function ConversationPage() {
             if (messages.length === 1 && messages[0].id === messageId) {
                 const convoRef = doc(db, 'conversations', conversationId);
                 await deleteDoc(convoRef);
-                toast({ title: "Conversation Deleted", description: "The last message was removed, so the conversation was deleted." });
+                toast.success("Conversation Deleted", { description: "The last message was removed, so the conversation was deleted." });
                 router.push('/chat');
                 return; // Exit the function
             }
@@ -143,19 +142,18 @@ export default function ConversationPage() {
             // Otherwise, just delete the single message
             const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
             await deleteDoc(messageRef);
-            toast({ title: "Message Deleted", description: "The message has been successfully removed." });
+            toast.success("Message Deleted", { description: "The message has been successfully removed." });
 
         } catch (error) {
             console.error("Error deleting message: ", error);
-            toast({ title: "Error", description: "Could not delete the message.", variant: "destructive" });
+            toast.error("Error", { description: "Could not delete the message." });
         }
     };
 
     const handleReportMessage = (messageId: string) => {
         console.log(`Reporting message ${messageId}`);
         // In a real app, you would write this report to a "reports" collection in Firestore.
-        toast({
-            title: "Message Reported",
+        toast.info("Message Reported", {
             description: "Thank you for your feedback. We will review this message.",
         });
     };

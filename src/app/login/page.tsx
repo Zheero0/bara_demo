@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Logo from '@/components/logo';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import Link from 'next/link';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -25,7 +25,6 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 export default function LoginPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,10 +53,8 @@ export default function LoginPage() {
 
       router.push('/jobs');
     } catch (error: any) {
-      toast({
-        title: 'Google Sign-In Failed',
+      toast.error('Google Sign-In Failed', {
         description: error.message,
-        variant: 'destructive',
       });
       console.error('Google Sign-In error:', error);
     } finally {
@@ -72,10 +69,8 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       router.push('/jobs');
     } catch (error: any) {
-      toast({
-        title: 'Login Failed',
+      toast.error('Login Failed', {
         description: error.message,
-        variant: 'destructive',
       });
       console.error('Login error:', error);
     } finally {

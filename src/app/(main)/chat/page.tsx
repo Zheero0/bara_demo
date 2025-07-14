@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner";
 import { useRouter } from "next/navigation"
 
 type ConversationDetails = {
@@ -57,7 +57,6 @@ function ConversationListSkeleton() {
 
 export default function ChatPage() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const router = useRouter();
   const [conversations, setConversations] = useState<ConversationDetails[]>([]);
   const [loading, setLoading] = useState(true);
@@ -121,8 +120,7 @@ export default function ChatPage() {
 
     try {
       await deleteDoc(doc(db, "conversations", conversationToDelete));
-      toast({
-        title: "Conversation Deleted",
+      toast.success("Conversation Deleted", {
         description: "The conversation has been permanently removed.",
       });
       // Optionally, if the currently viewed chat is deleted, redirect
@@ -132,10 +130,8 @@ export default function ChatPage() {
 
     } catch (error) {
       console.error("Error deleting conversation: ", error);
-      toast({
-        title: "Error",
+      toast.error("Error", {
         description: "Could not delete the conversation.",
-        variant: "destructive",
       });
     }
   };

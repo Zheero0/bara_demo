@@ -66,7 +66,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner";
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -179,7 +179,6 @@ function LocationCombobox({ value, onChange }: { value: string, onChange: (value
 
 function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -197,7 +196,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
 
   async function onSubmit(values: z.infer<typeof jobSchema>) {
     if (!user) {
-      toast({ title: "Authentication Error", description: "You must be logged in to post a job.", variant: "destructive" });
+      toast.error("Authentication Error", { description: "You must be logged in to post a job." });
       return;
     }
     setLoading(true);
@@ -213,13 +212,13 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
         },
         createdAt: serverTimestamp()
       });
-      toast({ title: "Job Posted!", description: "Your job has been successfully posted." });
+      toast.success("Job Posted!", { description: "Your job has been successfully posted." });
       form.reset();
       onJobPosted();
       setIsDialogOpen(false);
     } catch (error) {
       console.error("Error posting job: ", error);
-      toast({ title: "Error", description: "There was an error posting your job. Please try again.", variant: "destructive" });
+      toast.error("Error", { description: "There was an error posting your job. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -347,7 +346,6 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
 }
 
 function ManageJobDialog({ job, onOpenChange }: { job: Job, onOpenChange: (open: boolean) => void }) {
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   const form = useForm<z.infer<typeof manageJobSchema>>({
@@ -362,11 +360,11 @@ function ManageJobDialog({ job, onOpenChange }: { job: Job, onOpenChange: (open:
     try {
       const jobRef = doc(db, "jobs", job.id);
       await updateDoc(jobRef, values);
-      toast({ title: "Job Updated!", description: "Your job details have been saved." });
+      toast.success("Job Updated!", { description: "Your job details have been saved." });
       onOpenChange(false); // Close dialog on success
     } catch (error) {
       console.error("Error updating job: ", error);
-      toast({ title: "Error", description: "There was an error updating your job.", variant: "destructive" });
+      toast.error("Error", { description: "There was an error updating your job." });
     } finally {
       setLoading(false);
     }
@@ -519,7 +517,6 @@ function ManageJobDialog({ job, onOpenChange }: { job: Job, onOpenChange: (open:
 function JobDetailView({ job, onBack, onManage, onDelete }: { job: Job, onBack: () => void, onManage: (job: Job) => void, onDelete: (jobId: string) => void }) {
   const router = useRouter();
   const { user } = useAuth();
-  const { toast } = useToast();
   const [applying, setApplying] = useState(false);
   const isJobPoster = user?.uid === job.postedBy.uid;
   
@@ -579,7 +576,7 @@ function JobDetailView({ job, onBack, onManage, onDelete }: { job: Job, onBack: 
 
     } catch (error) {
         console.error("Error applying for job: ", error);
-        toast({ title: "Error", description: "Could not start conversation. Please try again.", variant: "destructive" });
+        toast.error("Error", { description: "Could not start conversation. Please try again." });
     } finally {
         setApplying(false);
     }
@@ -714,7 +711,6 @@ function EmptyJobView() {
 
 function JobsContent() {
   const { user } = useAuth();
-  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
@@ -795,7 +791,7 @@ function JobsContent() {
     if (!jobToDelete) return;
     try {
       await deleteDoc(doc(db, "jobs", jobToDelete));
-      toast({ title: "Job Deleted", description: "The job posting has been removed." });
+      toast.success("Job Deleted", { description: "The job posting has been removed." });
       setJobToDelete(null); // Close the dialog
       // If the deleted job was the selected one, clear the selection
       if (selectedJob?.id === jobToDelete) {
@@ -803,7 +799,7 @@ function JobsContent() {
       }
     } catch (error) {
       console.error("Error deleting job: ", error);
-      toast({ title: "Error", description: "Could not delete the job. Please try again.", variant: "destructive" });
+      toast.error("Error", { description: "Could not delete the job. Please try again." });
     }
   };
 

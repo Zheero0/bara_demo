@@ -13,7 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { Check, CheckCircle2 } from "lucide-react"
 import { useAuth } from "@/hooks/use-auth";
 import { useState, useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -64,7 +64,6 @@ const plans = [
 
 export default function BillingPage() {
     const { user, profile, reloadProfile } = useAuth();
-    const { toast } = useToast();
     const [currentPlan, setCurrentPlan] = useState<Plan>('Free');
     const [loading, setLoading] = useState(false);
 
@@ -87,16 +86,13 @@ export default function BillingPage() {
             setCurrentPlan(newPlan);
             reloadProfile(); // Reload profile to get the latest plan status
             
-            toast({
-                title: "Plan Changed!",
+            toast.success("Plan Changed!", {
                 description: `You are now on the ${newPlan} plan.`,
             });
         } catch (error) {
             console.error("Error changing plan:", error);
-            toast({
-                title: "Error",
+            toast.error("Error", {
                 description: "Could not change your plan. Please try again.",
-                variant: "destructive",
             });
         } finally {
             setLoading(false);
