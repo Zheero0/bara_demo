@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
+import Link from 'next/link';
 
 function JobDetailSkeleton() {
   return (
@@ -154,7 +155,11 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
             </div>
         </CardContent>
         <CardFooter>
-          <Button size="lg">Apply for this Job</Button>
+          <Button asChild size="lg">
+            <Link href={`/messages/application-convo-1?jobTitle=${encodeURIComponent(job.title)}&posterName=${encodeURIComponent(job.postedBy.name)}&posterAvatar=${encodeURIComponent(job.postedBy.avatar)}`}>
+              Apply for this Job
+            </Link>
+          </Button>
         </CardFooter>
       </Card>
     </div>
