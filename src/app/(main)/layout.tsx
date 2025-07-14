@@ -3,7 +3,6 @@
 import { NavLink } from "@/components/nav-link";
 import Link from "next/link"
 import {
-  Home,
   Menu,
   MessageSquare,
   Search,
@@ -35,11 +34,13 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 
 function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const unreadCount = useUnreadMessages(user?.uid);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -56,9 +57,8 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (loading || !user) {
-    return (
-       <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+  const FullPageLoader = () => (
+     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
         <div className="hidden border-r bg-muted/40 md:block">
             <div className="flex h-full max-h-screen flex-col gap-2">
                 <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
@@ -80,7 +80,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
             </div>
             <Skeleton className="h-9 w-9 rounded-full" />
           </header>
-          <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          <main className="flex-1 overflow-auto p-4 lg:p-6">
             <Skeleton className="h-10 w-1/4 mb-4" />
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -99,7 +99,10 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </main>
         </div>
        </div>
-    );
+  );
+
+  if (loading || !user) {
+    return <FullPageLoader />;
   }
 
   return (
@@ -118,9 +121,11 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
               <NavLink href="/messages">
                 <MessageSquare className="h-4 w-4" />
                 Messages
-                <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                  3
-                </Badge>
+                {unreadCount > 0 && (
+                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                    {unreadCount}
+                  </Badge>
+                )}
               </NavLink>
               <NavLink href="/connections">
                 <Users className="h-4 w-4" />
@@ -157,7 +162,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col h-screen">
         <header className="flex h-14 shrink-0 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
           <Sheet>
             <SheetTrigger asChild>
@@ -180,9 +185,11 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
                 <NavLink href="/messages" variant="mobile">
                   <MessageSquare className="h-5 w-5" />
                   Messages
-                  <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
-                    3
-                  </Badge>
+                  {unreadCount > 0 && (
+                    <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
+                      {unreadCount}
+                    </Badge>
+                  )}
                 </NavLink>
                 <NavLink href="/connections" variant="mobile">
                   <Users className="h-5 w-5" />

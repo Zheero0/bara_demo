@@ -44,6 +44,7 @@ export type Conversation = {
     jobId: string;
     lastMessage?: {
         text: string;
+        senderId: string;
         timestamp: Timestamp;
     };
     // We'll fetch participant details on the fly
