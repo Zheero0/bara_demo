@@ -102,10 +102,10 @@ export default function ChatPage() {
   }, [user]);
 
   return (
-    <div className="grid w-full h-full grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <Card className="col-span-1 md:col-span-1 lg:col-span-1 flex flex-col">
+    <div className="grid w-full h-full grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <Card className="col-span-1 md:col-span-1 lg:col-span-2 flex flex-col">
             <CardHeader>
-                <CardTitle className="font-headline">Conversations</CardTitle>
+                <CardTitle className="font-headline">Chat</CardTitle>
             </CardHeader>
             <CardContent className="p-0 flex-1 overflow-y-auto">
                 {loading ? (
@@ -138,8 +138,8 @@ export default function ChatPage() {
         <div className="col-span-1 md:col-span-2 lg:col-span-3 hidden md:flex flex-col">
             <Card className="flex-1 flex flex-col items-center justify-center text-center">
                 <MessageSquareText className="w-16 h-16 text-muted-foreground/50" />
-                <h2 className="mt-4 text-xl font-semibold">Select a conversation</h2>
-                <p className="text-muted-foreground">Choose a conversation from the list to start chatting.</p>
+                <h2 className="mt-4 text-xl font-semibold">Select a chat</h2>
+                <p className="text-muted-foreground">Choose a chat from the list to start messaging.</p>
             </Card>
         </div>
     </div>
