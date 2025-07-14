@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Card,
@@ -101,7 +102,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
   return (
     <Dialog onOpenChange={(open) => !open && form.reset()}>
       <DialogTrigger asChild>
-        <Button>Post a Job</Button>
+        <Button size="sm">Post a Job</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -263,57 +264,57 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <CardTitle className="text-2xl font-headline">{job.title}</CardTitle>
-                    <CardDescription className="mt-2">
-                        <div className="flex items-center gap-2">
-                            <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={24} height={24} className="rounded-full" data-ai-hint="logo" />
+                    <CardTitle className="text-xl font-headline">{job.title}</CardTitle>
+                    <CardDescription className="mt-1">
+                        <div className="flex items-center gap-2 text-xs">
+                            <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
                             <span>Posted by {job.postedBy.name}</span>
                         </div>
                     </CardDescription>
                 </div>
             </div>
-             <Badge variant="secondary" className="text-base px-4 py-2">{job.category}</Badge>
+             <Badge variant="secondary" className="px-2 py-1 text-xs">{job.category}</Badge>
           </div>
         </CardHeader>
         <Separator />
-        <CardContent className="pt-6 space-y-8">
+        <CardContent className="pt-6 space-y-6">
             <div className="space-y-4">
-              <h3 className="font-semibold text-xl font-headline">Job Details</h3>
-              <div className="p-4 bg-muted/50 rounded-lg flex flex-wrap gap-x-8 gap-y-4">
+              <h3 className="font-semibold text-lg font-headline">Job Details</h3>
+              <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-4">
                   <div className="flex items-center">
-                      <DollarSign className="w-5 h-5 mr-3 text-primary" />
+                      <DollarSign className="w-4 h-4 mr-2 text-primary" />
                       <div>
-                          <p className="text-sm text-muted-foreground">Price</p>
-                          <p className="font-semibold">${job.price.toLocaleString()}</p>
+                          <p className="text-xs text-muted-foreground">Price</p>
+                          <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
                       </div>
                   </div>
                   <div className="flex items-center">
-                      <Briefcase className="w-5 h-5 mr-3 text-primary" />
+                      <Briefcase className="w-4 h-4 mr-2 text-primary" />
                       <div>
-                          <p className="text-sm text-muted-foreground">Category</p>
-                          <p className="font-semibold">{job.category}</p>
+                          <p className="text-xs text-muted-foreground">Category</p>
+                          <p className="font-semibold text-sm">{job.category}</p>
                       </div>
                   </div>
                   {job.createdAt && (
                       <div className="flex items-center">
-                          <Calendar className="w-5 h-5 mr-3 text-primary" />
+                          <Calendar className="w-4 h-4 mr-2 text-primary" />
                           <div>
-                              <p className="text-sm text-muted-foreground">Date Posted</p>
-                              <p className="font-semibold">{format(job.createdAt.toDate(), 'PPP')}</p>
+                              <p className="text-xs text-muted-foreground">Date Posted</p>
+                              <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
                           </div>
                       </div>
                   )}
               </div>
             </div>
             <div className="space-y-4">
-                <h3 className="font-semibold text-xl font-headline">Job Description</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{job.description}</p>
+                <h3 className="font-semibold text-lg font-headline">Job Description</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.description}</p>
             </div>
         </CardContent>
       </ScrollArea>
-      <CardFooter className="border-t pt-6">
+      <CardFooter className="border-t pt-4">
           {!isJobPoster && (
-            <Button onClick={handleApply} size="lg" disabled={applying || !user}>
+            <Button onClick={handleApply} size="sm" disabled={applying || !user}>
               {applying ? 'Starting conversation...' : 'Apply for this Job'}
             </Button>
           )}
@@ -383,10 +384,10 @@ function JobsContent() {
         <div className={cn("md:col-span-4 flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                <h1 className="text-3xl font-headline font-bold">Job Marketplace</h1>
+                <h1 className="text-2xl font-headline font-bold">Job Marketplace</h1>
                 <p className="text-muted-foreground">Find your next project.</p>
                 </div>
-                <div className="flex-shrink-0">
+                <div className="flex-shrink-0 md:self-end">
                     <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
                 </div>
             </div>
@@ -422,8 +423,8 @@ function JobsContent() {
                                 <CardHeader>
                                     <div className="flex items-start justify-between">
                                         <div>
-                                            <CardTitle className="font-headline text-lg mb-1 line-clamp-1">{job.title}</CardTitle>
-                                            <CardDescription className="flex items-center gap-2">
+                                            <CardTitle className="font-headline text-base mb-1 line-clamp-1">{job.title}</CardTitle>
+                                            <CardDescription className="flex items-center gap-2 text-xs">
                                                 <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
                                                 {job.postedBy.name}
                                             </CardDescription>
@@ -466,5 +467,7 @@ export default function JobsPage() {
     </Suspense>
   )
 }
+
+    
 
     
