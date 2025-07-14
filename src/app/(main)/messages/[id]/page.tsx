@@ -29,7 +29,7 @@ export default function ConversationPage({ params }: { params: { id: string } })
     <div className="h-full flex flex-col">
             <Card className="flex-1 flex flex-col">
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <Button variant="ghost" size="icon" className="md:hidden" onClick={() => router.back()}>
+                    <Button variant="ghost" size="icon" onClick={() => router.push('/messages')}>
                         <ArrowLeft className="w-5 h-5" />
                         <span className="sr-only">Back</span>
                     </Button>
