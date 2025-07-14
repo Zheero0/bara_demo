@@ -78,13 +78,13 @@ const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   category: z.string().min(1, "Please select a category."),
   price: z.coerce.number().min(1, "Price must be greater than 0."),
-  jobType: z.enum(['On-site', 'Remote']).or(z.string().min(1, "Please select a job type.")),
+  jobType: z.enum(['On-site', 'Remote']),
   location: z.string().min(2, "Please specify a location.").max(50, "Location must be 50 characters or less."),
   description: z.string().min(20, "Description must be at least 20 characters long."),
 });
 
 const manageJobSchema = jobSchema.extend({
-  status: z.enum(['Open', 'Closed']),
+  status: z.enum(['Open', 'In Progress', 'Completed']),
 });
 
 
@@ -165,7 +165,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
       title: "",
       category: "",
       price: 0,
-      jobType: "",
+      jobType: "On-site",
       location: "",
       description: "",
     },
@@ -379,6 +379,77 @@ function ManageJobDialog({ job }: { job: Job }) {
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                 <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                        {JOB_CATEGORIES.map(category => (
+                             <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+                 <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Price (£)</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="jobType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Job Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a job type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="On-site">On-site</SelectItem>
+                          <SelectItem value="Remote">Remote</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            </div>
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                   <FormControl>
+                     <LocationCombobox value={field.value} onChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="status"
@@ -393,7 +464,8 @@ function ManageJobDialog({ job }: { job: Job }) {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="Open">Open</SelectItem>
-                      <SelectItem value="Closed">Closed</SelectItem>
+                      <SelectItem value="In Progress">In Progress</SelectItem>
+                      <SelectItem value="Completed">Completed</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -585,8 +657,8 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
       </ScrollArea>
       <CardFooter className="border-t pt-4">
           {!isJobPoster && (
-            <Button onClick={handleApply} size="sm" disabled={applying || !user || job.status === 'Closed'}>
-              {job.status === 'Closed' ? 'Job Closed' : applying ? 'Starting conversation...' : 'Apply for this Job'}
+            <Button onClick={handleApply} size="sm" disabled={applying || !user || job.status !== 'Open'}>
+              {job.status !== 'Open' ? `Job ${job.status}` : applying ? 'Starting conversation...' : 'Apply for this Job'}
             </Button>
           )}
       </CardFooter>
@@ -688,6 +760,19 @@ function JobsContent() {
     setJobTypeFilter('All Types');
   };
 
+  const getStatusBadgeClass = (status: Job['status']) => {
+    switch (status) {
+        case 'Open':
+            return 'bg-green-600';
+        case 'In Progress':
+            return 'bg-yellow-500';
+        case 'Completed':
+            return 'bg-gray-500';
+        default:
+            return 'bg-muted';
+    }
+  }
+
 
   return (
     <div className="grid md:grid-cols-10 gap-6 h-full">
@@ -784,7 +869,7 @@ function JobsContent() {
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <CardTitle className="font-headline text-base line-clamp-1">{job.title}</CardTitle>
-                                                <Badge variant={job.status === 'Open' ? 'default' : 'secondary'} className={cn(job.status === 'Open' && 'bg-green-600')}>{job.status}</Badge>
+                                                <Badge variant={'default'} className={cn(getStatusBadgeClass(job.status))}>{job.status}</Badge>
                                             </div>
                                             <CardDescription className="flex items-center gap-2 text-xs">
                                                 <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />

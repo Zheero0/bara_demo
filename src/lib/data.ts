@@ -21,7 +21,7 @@ export type Job = {
   location: string;
   jobType: 'On-site' | 'Remote';
   description: string;
-  status: 'Open' | 'Closed';
+  status: 'Open' | 'In Progress' | 'Completed';
   postedBy: {
     uid: string; // Keep track of the poster's user ID
     name: string;
