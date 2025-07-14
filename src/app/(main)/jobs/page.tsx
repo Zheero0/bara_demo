@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState, useMemo, Suspense } from "react"
-import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs } from "firebase/firestore"
+import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -220,28 +220,40 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
-            // Create new conversation
             const newConversationRef = doc(collection(db, 'conversations'));
             const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
 
+            // 1. Create the conversation document with initial data
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
                 lastMessage: {
                     text: initialMessage,
                     senderId: user.uid,
-                    timestamp: serverTimestamp()
+                    // Timestamp will be updated in the next step
                 }
             });
+
             conversationId = newConversationRef.id;
             
-            // Add initial message to subcollection
+            // 2. Add the initial message to the subcollection with a server timestamp
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
-            await addDoc(messagesRef, {
+            const newMessageDoc = await addDoc(messagesRef, {
                 senderId: user.uid,
                 text: initialMessage,
                 timestamp: serverTimestamp(),
             });
+            
+            // 3. Update the conversation document's lastMessage with the actual timestamp
+            // from the newly created message. This avoids race conditions.
+            const newMessageSnap = await getDoc(newMessageDoc);
+            const newMessageData = newMessageSnap.data();
+
+            if (newMessageData && newMessageData.timestamp) {
+                 await updateDoc(newConversationRef, {
+                    'lastMessage.timestamp': newMessageData.timestamp
+                 });
+            }
         }
         
         router.push(`/messages/${conversationId}`);
@@ -253,7 +265,6 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         setApplying(false);
     }
   };
-
 
   return (
     <Card className="flex flex-col h-full">
