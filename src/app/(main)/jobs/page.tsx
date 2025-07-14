@@ -77,6 +77,18 @@ const jobSchema = z.object({
   description: z.string().min(20, "Description must be at least 20 characters long."),
 });
 
+const JOB_CATEGORIES = [
+    "DIY & Home Improvement",
+    "Cleaning Services",
+    "Tutoring & Education",
+    "Gardening & Landscaping",
+    "Moving & Delivery",
+    "Events & Photography",
+    "Personal Care & Wellness",
+    "Writing & Translation",
+    "Other"
+];
+
 function LocationCombobox({ value, onChange }: { value: string, onChange: (value: string) => void }) {
   const [open, setOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
@@ -195,7 +207,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. E-commerce Website Redesign" {...field} />
+                    <Input placeholder="e.g. Assemble IKEA furniture" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -214,12 +226,9 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                        <SelectItem value="Web Development">Web Development</SelectItem>
-                        <SelectItem value="Design">Design</SelectItem>
-                        <SelectItem value="Mobile Development">Mobile Development</SelectItem>
-                        <SelectItem value="Writing">Writing</SelectItem>
-                        <SelectItem value="DevOps">DevOps</SelectItem>
-                        <SelectItem value="Data Science">Data Science</SelectItem>
+                        {JOB_CATEGORIES.map(category => (
+                             <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -234,7 +243,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
                     <FormItem>
                       <FormLabel>Price (£)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g. 5000" {...field} />
+                        <Input type="number" placeholder="e.g. 150" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -399,30 +408,30 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
             <div className="space-y-2">
               <h3 className="font-semibold text-xs font-headline tracking-wider uppercase text-muted-foreground">Job Details</h3>
               <div className="border rounded-lg space-y-4 p-4">
-                  <div className="flex items-center space-x-2">
-                      <PoundSterling className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex items-start space-x-2">
+                      <PoundSterling className="w-4 h-4 text-primary shrink-0 mt-1" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
                           <p className="font-semibold text-sm">£{job.price.toLocaleString()}</p>
                       </div>
                   </div>
-                   <div className="flex items-center space-x-2">
-                      <MapPin className="w-4 h-4 text-primary shrink-0" />
+                   <div className="flex items-start space-x-2">
+                      <MapPin className="w-4 h-4 text-primary shrink-0 mt-1" />
                       <div>
                           <p className="text-xs text-muted-foreground">Location</p>
                           <p className="font-semibold text-sm">{job.location}</p>
                       </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                      <Briefcase className="w-4 h-4 text-primary shrink-0" />
+                  <div className="flex items-start space-x-2">
+                      <Briefcase className="w-4 h-4 text-primary shrink-0 mt-1" />
                       <div>
                           <p className="text-xs text-muted-foreground">Category</p>
                           <p className="font-semibold text-sm">{job.category}</p>
                       </div>
                   </div>
                   {job.createdAt && (
-                      <div className="flex items-center space-x-2">
-                          <Calendar className="w-4 h-4 text-primary shrink-0" />
+                      <div className="flex items-start space-x-2">
+                          <Calendar className="w-4 h-4 text-primary shrink-0 mt-1" />
                           <div>
                               <p className="text-xs text-muted-foreground">Date Posted</p>
                               <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
@@ -545,12 +554,9 @@ function JobsContent() {
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="All Categories">All Categories</SelectItem>
-                        <SelectItem value="Web Development">Web Development</SelectItem>
-                        <SelectItem value="Design">Design</SelectItem>
-                        <SelectItem value="Mobile Development">Mobile Development</SelectItem>
-                        <SelectItem value="Writing">Writing</SelectItem>
-                        <SelectItem value="DevOps">DevOps</SelectItem>
-                        <SelectItem value="Data Science">Data Science</SelectItem>
+                        {JOB_CATEGORIES.map(category => (
+                            <SelectItem key={category} value={category}>{category}</SelectItem>
+                        ))}
                     </SelectContent>
                     </Select>
                 </div>
