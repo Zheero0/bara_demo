@@ -392,6 +392,7 @@ function EmptyJobView() {
 }
 
 function JobsContent() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const [locationFilter, setLocationFilter] = useState('');
