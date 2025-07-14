@@ -96,7 +96,7 @@ export default function SettingsPage() {
                     <Skeleton className="h-10 w-24" />
                 </CardFooter>
             </Card>
-      )
+      );
   }
 
   return (
@@ -265,7 +265,7 @@ export default function SettingsPage() {
               <CardTitle>Appearance</CardTitle>
               <CardDescription>
                 Customize the look and feel of the application.
-              </CardDescription>
+              </Description>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between space-x-2">
