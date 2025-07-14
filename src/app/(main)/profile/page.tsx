@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Job } from "@/lib/data";
-import { Mail, MapPin, UserPlus } from "lucide-react";
+import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -15,6 +15,13 @@ import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 
 export default function ProfilePage() {
@@ -89,6 +96,27 @@ export default function ProfilePage() {
             <div className="flex gap-2 mt-4 md:mt-0">
               <Button><UserPlus className="mr-2 h-4 w-4" /> Connect</Button>
               <Button variant="outline"><Mail className="mr-2 h-4 w-4" /> Message</Button>
+               <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem asChild>
+                    <Link href="/settings">Manage Account</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Flag className="mr-2 h-4 w-4" />
+                    Report User
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive">
+                    <ShieldX className="mr-2 h-4 w-4" />
+                    Block User
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </CardContent>
