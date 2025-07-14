@@ -2,8 +2,8 @@
 'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Briefcase, MessagesSquare, Users } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowRight, Briefcase, MessagesSquare, Users, CheckCircle } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Logo from '@/components/logo';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,12 +21,15 @@ export default function LandingPage() {
           <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4">
             Features
           </Link>
+           <Link href="#pricing" className="text-sm font-medium hover:underline underline-offset-4">
+            Pricing
+          </Link>
           <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4">
             Contact
           </Link>
           {loading ? null : user ? (
             <Link href="/jobs">
-              <Button variant="ghost">Jobs</Button>
+              <Button>Dashboard</Button>
             </Link>
           ) : (
             <>
@@ -40,7 +43,7 @@ export default function LandingPage() {
           )}
         </nav>
         <div className="md:hidden">
-            <Link href="/jobs">
+            <Link href="/signup">
                 <Button>Get Started</Button>
             </Link>
         </div>
@@ -50,14 +53,14 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center space-y-6 text-center">
               <h1 className="font-headline text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-                barabara
+                The UK's Premier Marketplace for Pro Freelancers
               </h1>
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
-                Connect, collaborate, and create. Your next opportunity is just a message away.
+                Find exclusive projects, connect with top-tier UK clients, and get paid, all in one place. Join Bara Pro today.
               </p>
-              <Link href="/jobs">
+              <Link href="/signup">
                 <Button size="lg">
-                  Find Your Next Opportunity <ArrowRight className="ml-2 h-5 w-5" />
+                  Become a Bara Pro <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
@@ -67,44 +70,78 @@ export default function LandingPage() {
         <section id="features" className="w-full py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
-                <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">Everything you need to connect</h2>
+                <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">The Bara Pro Advantage</h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                    A platform designed for professionals to find work, build teams, and grow their network.
+                    Our platform is built on trust and quality. We connect the best UK talent with the best projects.
                 </p>
             </div>
             <div className="mx-auto grid max-w-5xl items-start gap-8 sm:grid-cols-2 md:gap-12 lg:max-w-none lg:grid-cols-3">
               <Card>
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Briefcase className="w-8 h-8 text-primary" />
-                  <CardTitle className="font-headline">Job Marketplace</CardTitle>
+                  <CardTitle className="font-headline">Exclusive Job Board</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Discover opportunities or find the perfect talent for your next project in our curated marketplace.</p>
+                  <p className="text-muted-foreground">Gain access to high-quality, vetted projects you won't find anywhere else. Say goodbye to low-ball offers.</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center gap-4">
                   <Users className="w-8 h-8 text-primary" />
-                  <CardTitle className="font-headline">Meaningful Connections</CardTitle>
+                  <CardTitle className="font-headline">Become a "Bara Pro"</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Build your professional network with user profiles, connection requests, and user search.</p>
+                  <p className="text-muted-foreground">Join our approved list of trusted UK professionals. Clients look for the "Bara Pro" badge for quality assurance.</p>
                 </CardContent>
               </Card>
               <Card>
                 <CardHeader className="flex flex-row items-center gap-4">
                   <MessagesSquare className="w-8 h-8 text-primary" />
-                  <CardTitle className="font-headline">Direct Messaging</CardTitle>
+                  <CardTitle className="font-headline">Powerful Tools</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">Communicate seamlessly with built-in private messaging to discuss projects and ideas.</p>
+                  <p className="text-muted-foreground">From direct messaging to project management, get the tools you need to collaborate effectively and get paid on time.</p>
                 </CardContent>
               </Card>
             </div>
           </div>
         </section>
 
-        <section id="contact" className="w-full py-12 md:py-24 lg:py-32 bg-muted/30">
+        <section id="pricing" className="w-full py-12 md:py-24 lg:py-32 bg-muted/30">
+          <div className="container px-4 md:px-6">
+             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">Simple, Transparent Pricing</h2>
+                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                    One plan, all features. Become a Pro and unlock your full potential.
+                </p>
+            </div>
+             <div className="mx-auto flex justify-center">
+                 <Card className="w-full max-w-md shadow-lg">
+                    <CardHeader className="text-center">
+                        <CardTitle className="text-2xl font-headline">Bara Pro</CardTitle>
+                        <CardDescription>Full access to the platform.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center">
+                        <div className="my-4">
+                            <span className="text-5xl font-bold">£99</span>
+                            <span className="text-muted-foreground">/month</span>
+                        </div>
+                        <ul className="space-y-3 w-full text-left my-4">
+                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Apply to unlimited jobs</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Get the "Bara Pro" badge</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Priority support</li>
+                            <li className="flex items-center gap-2"><CheckCircle className="text-green-500" /> Full access to communication tools</li>
+                        </ul>
+                         <Link href="/signup" className="w-full">
+                            <Button className="w-full" size="lg">Get Started</Button>
+                        </Link>
+                    </CardContent>
+                </Card>
+             </div>
+          </div>
+        </section>
+
+        <section id="contact" className="w-full py-12 md:py-24 lg:py-32">
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
               <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">Get In Touch</h2>
@@ -160,4 +197,3 @@ export default function LandingPage() {
   );
 }
 
-    
