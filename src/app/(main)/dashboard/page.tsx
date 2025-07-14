@@ -363,12 +363,14 @@ export default function DashboardPage() {
     <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
         <div className={cn("md:col-span-4 flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                 <h1 className="text-3xl font-headline font-bold">Job Marketplace</h1>
                 <p className="text-muted-foreground">Find your next project.</p>
                 </div>
-                <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
+                <div className="flex-shrink-0">
+                    <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
+                </div>
             </div>
             <div className="border shadow-sm rounded-lg p-4">
                 {/* Filters can go here */}
