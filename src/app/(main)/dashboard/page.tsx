@@ -23,7 +23,7 @@ import Image from "next/image"
 import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, Suspense } from "react"
 import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,7 +46,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Briefcase, Calendar, DollarSign, BriefcaseBusiness, ArrowLeft } from "lucide-react"
 import { format } from "date-fns"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils";
 
 const jobSchema = z.object({
@@ -333,8 +333,11 @@ function EmptyJobView() {
     )
 }
 
-export default function DashboardPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
+function DashboardContent() {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('q') || '';
+
+  const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -344,15 +347,31 @@ export default function DashboardPage() {
     const unsubscribe = onSnapshot(collection(db, "jobs"), (snapshot) => {
       const jobsData: Job[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Job));
       const sortedJobs = jobsData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-      setJobs(sortedJobs);
+      setAllJobs(sortedJobs);
       if (loading) {
-        setSelectedJob(sortedJobs[0] || null);
         setLoading(false);
       }
     });
 
     return () => unsubscribe();
   }, [loading]);
+
+  const filteredJobs = useMemo(() => {
+    if (!searchQuery) return allJobs;
+    return allJobs.filter(job =>
+      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      job.description.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [allJobs, searchQuery]);
+
+  useEffect(() => {
+    if (!selectedJob && filteredJobs.length > 0) {
+      setSelectedJob(filteredJobs[0]);
+    } else if (selectedJob && !filteredJobs.some(j => j.id === selectedJob.id)) {
+      // If the selected job is not in the filtered list, select the first one or null
+      setSelectedJob(filteredJobs[0] || null);
+    }
+  }, [filteredJobs, selectedJob]);
   
   const handleJobSelect = (job: Job) => {
       setSelectedJob(job);
@@ -395,7 +414,7 @@ export default function DashboardPage() {
                     {loading ? (
                          Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)
                     ) : (
-                        jobs.map((job) => (
+                        filteredJobs.map((job) => (
                             <Card 
                                 key={job.id} 
                                 className={`cursor-pointer transition-all ${selectedJob?.id === job.id ? 'border-primary' : ''}`}
@@ -438,5 +457,13 @@ export default function DashboardPage() {
             )}
         </div>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   )
 }

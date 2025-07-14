@@ -31,18 +31,28 @@ import { UserNav } from "@/components/user-nav"
 import Logo from "@/components/logo"
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 function MainLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/dashboard?q=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      router.push('/dashboard');
+    }
+  };
 
   if (loading || !user) {
     return (
@@ -201,13 +211,15 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
-            <form>
+            <form onSubmit={handleSearch}>
               <div className="relative">
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search users, jobs..."
+                  placeholder="Search jobs..."
                   className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
             </form>
