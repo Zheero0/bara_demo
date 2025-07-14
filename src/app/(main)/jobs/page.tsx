@@ -44,7 +44,13 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, DollarSign, BriefcaseBusiness, ArrowLeft } from "lucide-react"
+import { Briefcase, Calendar, DollarSign, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { format } from "date-fns"
 import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils";
@@ -347,7 +353,7 @@ function EmptyJobView() {
 function JobsContent() {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
-
+  const { user } = useAuth();
   const [allJobs, setAllJobs] = useState<Job[]>([]);
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -446,6 +452,26 @@ function JobsContent() {
                                                 {job.postedBy.name}
                                             </CardDescription>
                                         </div>
+                                         <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={(e) => e.stopPropagation()}>
+                                                    <MoreHorizontal className="h-4 w-4" />
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                                                {user?.uid === job.postedBy.uid ? (
+                                                    <DropdownMenuItem>
+                                                        <Settings className="mr-2 h-4 w-4" />
+                                                        Manage Job
+                                                    </DropdownMenuItem>
+                                                ) : (
+                                                    <DropdownMenuItem>
+                                                        <Flag className="mr-2 h-4 w-4" />
+                                                        Report Job
+                                                    </DropdownMenuItem>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </CardHeader>
                                 <CardContent className="p-4 pt-0">
