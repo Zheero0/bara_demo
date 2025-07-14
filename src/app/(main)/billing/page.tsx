@@ -84,7 +84,7 @@ export default function BillingPage() {
             await setDoc(userRef, { plan: newPlan }, { merge: true });
 
             setCurrentPlan(newPlan);
-            reloadProfile(); // Reload profile to get the latest plan status
+            reloadProfile(); // Reload pr ofile to get the latest plan status
             
             toast.success("Plan Changed!", {
                 description: `You are now on the ${newPlan} plan.`,
