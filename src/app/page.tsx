@@ -1,3 +1,5 @@
+
+'use client';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, MessagesSquare, Users } from 'lucide-react';
@@ -6,8 +8,11 @@ import Logo from '@/components/logo';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function LandingPage() {
+  const { user, loading } = useAuth();
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
@@ -19,12 +24,20 @@ export default function LandingPage() {
           <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4">
             Contact
           </Link>
-          <Link href="/dashboard">
-            <Button variant="ghost">Login</Button>
-          </Link>
-          <Link href="/dashboard">
-            <Button>Sign Up</Button>
-          </Link>
+          {loading ? null : user ? (
+            <Link href="/dashboard">
+              <Button variant="ghost">Dashboard</Button>
+            </Link>
+          ) : (
+            <>
+              <Link href="/login">
+                <Button variant="ghost">Login</Button>
+              </Link>
+              <Link href="/login">
+                <Button>Sign Up</Button>
+              </Link>
+            </>
+          )}
         </nav>
         <div className="md:hidden">
             <Link href="/dashboard">
