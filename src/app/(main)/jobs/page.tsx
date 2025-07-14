@@ -229,20 +229,17 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
             const newConversationRef = doc(collection(db, 'conversations'));
             const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
 
-            // 1. Create the conversation document with initial data
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
                 lastMessage: {
                     text: initialMessage,
                     senderId: user.uid,
-                    // Timestamp will be updated in the next step
                 }
             });
 
             conversationId = newConversationRef.id;
             
-            // 2. Add the initial message to the subcollection with a server timestamp
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             const newMessageDoc = await addDoc(messagesRef, {
                 senderId: user.uid,
@@ -250,8 +247,6 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                 timestamp: serverTimestamp(),
             });
             
-            // 3. Update the conversation document's lastMessage with the actual timestamp
-            // from the newly created message. This avoids race conditions.
             const newMessageSnap = await getFirestoreDoc(newMessageDoc);
             const newMessageData = newMessageSnap.data();
 
@@ -297,15 +292,15 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         <CardContent className="pt-6 space-y-6">
             <div className="space-y-4">
               <h3 className="font-semibold text-sm font-headline">Job Details</h3>
-              <div className="p-4 bg-muted/50 rounded-lg space-y-3">
-                  <div className="flex items-start">
+              <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-2 gap-4">
+                  <div className="flex items-start col-span-1">
                       <DollarSign className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
                           <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
                       </div>
                   </div>
-                  <div className="flex items-start">
+                  <div className="flex items-start col-span-1">
                       <Briefcase className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Category</p>
@@ -313,7 +308,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                       </div>
                   </div>
                   {job.createdAt && (
-                      <div className="flex items-start">
+                      <div className="flex items-start col-span-2">
                           <Calendar className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
                           <div>
                               <p className="text-xs text-muted-foreground">Date Posted</p>
@@ -402,9 +397,9 @@ function JobsContent() {
 
 
   return (
-    <div className="grid md:grid-cols-10 gap-6">
+    <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
-        <div className={cn("md:col-span-4 flex-col gap-4 h-full", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
+        <div className={cn("md:col-span-4 flex flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                 <h1 className="text-xl font-headline font-bold">Job Search</h1>
@@ -489,7 +484,7 @@ function JobsContent() {
              </ScrollArea>
         </div>
         {/* Right Column */}
-        <div className={cn("md:col-span-6 max-h-full", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
+        <div className={cn("md:col-span-6", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
             {loading ? (
                 <Card className="h-full"><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
             ) : selectedJob ? (
