@@ -77,8 +77,9 @@ export default function ConversationPage() {
                 }
             } else {
                 console.log("Conversation not found!");
-                toast({ title: "Not Found", description: "This conversation does not exist.", variant: "destructive" });
-                router.push('/chat');
+                // Don't show toast if it was deleted intentionally
+                // toast({ title: "Not Found", description: "This conversation does not exist.", variant: "destructive" });
+                // router.push('/chat');
             }
         });
 
@@ -130,9 +131,20 @@ export default function ConversationPage() {
     const handleDeleteMessage = async (messageId: string) => {
         if (!conversationId || !messageId) return;
         try {
+            // If this is the last message, delete the entire conversation
+            if (messages.length === 1 && messages[0].id === messageId) {
+                const convoRef = doc(db, 'conversations', conversationId);
+                await deleteDoc(convoRef);
+                toast({ title: "Conversation Deleted", description: "The last message was removed, so the conversation was deleted." });
+                router.push('/chat');
+                return; // Exit the function
+            }
+
+            // Otherwise, just delete the single message
             const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
             await deleteDoc(messageRef);
             toast({ title: "Message Deleted", description: "The message has been successfully removed." });
+
         } catch (error) {
             console.error("Error deleting message: ", error);
             toast({ title: "Error", description: "Could not delete the message.", variant: "destructive" });
@@ -285,5 +297,3 @@ export default function ConversationPage() {
     </Card>
   )
 }
-
-    
