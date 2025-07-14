@@ -3,6 +3,9 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Briefcase, MessagesSquare, Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Logo from '@/components/logo';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function LandingPage() {
   return (
@@ -13,8 +16,8 @@ export default function LandingPage() {
           <Link href="#features" className="text-sm font-medium hover:underline underline-offset-4">
             Features
           </Link>
-          <Link href="#pricing" className="text-sm font-medium hover:underline underline-offset-4">
-            Pricing
+          <Link href="#contact" className="text-sm font-medium hover:underline underline-offset-4">
+            Contact
           </Link>
           <Link href="/dashboard">
             <Button variant="ghost">Login</Button>
@@ -87,6 +90,47 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <section id="contact" className="w-full py-12 md:py-24 lg:py-32 bg-muted/30">
+          <div className="container px-4 md:px-6">
+            <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+              <h2 className="text-3xl font-headline font-bold tracking-tighter sm:text-5xl">Get In Touch</h2>
+              <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                Have questions or want to learn more? Drop us a line.
+              </p>
+            </div>
+            <div className="mx-auto w-full max-w-2xl">
+              <Card>
+                <CardContent className="p-6">
+                  <form className="grid gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="grid gap-2">
+                        <Label htmlFor="first-name">First name</Label>
+                        <Input id="first-name" placeholder="John" required />
+                      </div>
+                      <div className="grid gap-2">
+                        <Label htmlFor="last-name">Last name</Label>
+                        <Input id="last-name" placeholder="Doe" required />
+                      </div>
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input id="email" type="email" placeholder="john.doe@example.com" required />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="message">Message</Label>
+                      <Textarea id="message" placeholder="Type your message here." required className="min-h-[120px]" />
+                    </div>
+                    <Button type="submit" className="w-full">
+                      Send Message
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">&copy; 2024 barabara Inc. All rights reserved.</p>
