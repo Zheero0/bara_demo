@@ -23,8 +23,9 @@ import { useToast } from "@/hooks/use-toast"
 import { doc, setDoc } from "firebase/firestore";
 import { updateProfile as updateFirebaseProfile } from "firebase/auth";
 import { db, auth } from "@/lib/firebase"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTheme } from "next-themes"
 
 const profileSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
@@ -38,6 +39,7 @@ export default function SettingsPage() {
   const { user, profile, loading: authLoading, reloadProfile } = useAuth();
   const { toast } = useToast();
   const [formLoading, setFormLoading] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const form = useForm<z.infer<typeof profileSchema>>({
     resolver: zodResolver(profileSchema),
@@ -267,7 +269,11 @@ export default function SettingsPage() {
                       Enable dark mode for a different visual experience.
                     </span>
                   </Label>
-                  <Switch id="dark-mode" />
+                  <Switch 
+                    id="dark-mode" 
+                    checked={theme === 'dark'}
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  />
                 </div>
             </CardContent>
              <CardFooter className="border-t px-6 py-4">
