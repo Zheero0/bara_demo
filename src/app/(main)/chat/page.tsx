@@ -166,7 +166,7 @@ export default function ChatPage() {
                                         <AvatarFallback>{convo.otherUser.name.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold truncate">{convo.otherUser.name}</p>
+                                        <p className="font-semibold truncate">{convo.job.title}</p>
                                         <p className="text-sm text-muted-foreground truncate">{convo.lastMessageText}</p>
                                     </div>
                                     <span className="text-xs text-muted-foreground whitespace-nowrap">{convo.lastMessageTimestamp}</span>
