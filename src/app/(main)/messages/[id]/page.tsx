@@ -159,55 +159,79 @@ export default function ConversationPage() {
     }
 
   return (
-    <div className="h-full flex flex-col">
-        <Card className="flex-1 flex flex-col">
-            <CardHeader className="flex flex-row items-center gap-4 p-4 border-b sticky top-0 bg-background z-10">
-                <Button variant="ghost" size="icon" onClick={() => router.push('/messages')} className="shrink-0">
-                    <ArrowLeft className="w-5 h-5" />
-                    <span className="sr-only">Back</span>
-                </Button>
-                <Avatar>
-                    <AvatarImage src={otherUser.avatar} />
-                    <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+    <Card className="flex flex-col h-full">
+      <CardHeader className="flex flex-row items-center gap-4 p-4 border-b bg-background">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push('/messages')}
+          className="shrink-0"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          <span className="sr-only">Back</span>
+        </Button>
+        <Avatar>
+          <AvatarImage src={otherUser.avatar} />
+          <AvatarFallback>{otherUser.name.charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0">
+          <p className="font-semibold text-base truncate">{job.title}</p>
+          <p className="text-sm text-muted-foreground">with {otherUser.name}</p>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 p-6 space-y-6 overflow-y-auto">
+        {messages.map((message) => {
+          const isMe = message.senderId === user?.uid
+          const sender = isMe ? user : otherUser
+          return (
+            <div
+              key={message.id}
+              className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+            >
+              {!isMe && (
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={sender.avatar} />
                 </Avatar>
-                <div className="min-w-0">
-                    <p className="font-semibold text-base truncate">{job.title}</p>
-                    <p className="text-sm text-muted-foreground">with {otherUser.name}</p>
-                </div>
-            </CardHeader>
-            <CardContent className="flex-1 p-6 space-y-6 overflow-y-auto">
-                {messages.map(message => {
-                    const isMe = message.senderId === user?.uid;
-                    const sender = isMe ? user : otherUser;
-                    return (
-                         <div key={message.id} className={`flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}>
-                            {!isMe && <Avatar className="w-8 h-8"><AvatarImage src={sender.avatar} /></Avatar>}
-                            <div className={`rounded-lg px-4 py-2 max-w-xs lg:max-w-md ${isMe ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                <p>{message.text}</p>
-                                 <p className={`text-xs mt-1 text-right ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
-                                     {message.timestamp ? format(message.timestamp.toDate(), 'p') : 'sending...'}
-                                </p>
-                            </div>
-                            {isMe && user && <Avatar className="w-8 h-8"><AvatarImage src={user.photoURL || undefined} /></Avatar>}
-                        </div>
-                    )
-                })}
-                 <div ref={messagesEndRef} />
-            </CardContent>
-            <div className="p-4 border-t bg-background">
-                 <form onSubmit={handleSendMessage} className="relative">
-                    <Input 
-                        placeholder="Type a message..." 
-                        className="pr-12"
-                        value={newMessage}
-                        onChange={(e) => setNewMessage(e.target.value)}
-                    />
-                    <Button type="submit" size="icon" className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8">
-                        <SendHorizonal className="h-4 w-4" />
-                    </Button>
-                </form>
+              )}
+              <div
+                className={`rounded-lg px-4 py-2 max-w-xs lg:max-w-md ${isMe ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+              >
+                <p>{message.text}</p>
+                <p
+                  className={`text-xs mt-1 text-right ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}
+                >
+                  {message.timestamp
+                    ? format(message.timestamp.toDate(), 'p')
+                    : 'sending...'}
+                </p>
+              </div>
+              {isMe && user && (
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={user.photoURL || undefined} />
+                </Avatar>
+              )}
             </div>
-        </Card>
-    </div>
+          )
+        })}
+        <div ref={messagesEndRef} />
+      </CardContent>
+      <div className="p-4 border-t bg-background">
+        <form onSubmit={handleSendMessage} className="relative">
+          <Input
+            placeholder="Type a message..."
+            className="pr-12"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+          />
+          <Button
+            type="submit"
+            size="icon"
+            className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+          >
+            <SendHorizonal className="h-4 w-4" />
+          </Button>
+        </form>
+      </div>
+    </Card>
   )
 }
