@@ -184,8 +184,8 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
                 <SheetTitle>
                    <Logo />
                 </SheetTitle>
-                <SheetDescription>
-                  Navigate through the app's features.
+                <SheetDescription className="text-left">
+                  Connections Made easy
                 </SheetDescription>
               </SheetHeader>
               <nav className="grid gap-2 text-lg font-medium py-4">
