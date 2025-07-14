@@ -48,6 +48,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
@@ -56,7 +61,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown, RotateCcw } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown, RotateCcw, SlidersHorizontal } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -506,6 +511,7 @@ function JobsContent() {
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [mobileView, setMobileView] = useState<'list' | 'detail'>('list');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "jobs"), (snapshot) => {
@@ -526,8 +532,8 @@ function JobsContent() {
         ? job.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
           job.description.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
-      const matchesLocation = locationFilter 
-        ? job.location && job.location.toLowerCase().includes(locationFilter.toLowerCase())
+      const matchesLocation = locationFilter && job.location
+        ? job.location.toLowerCase().includes(locationFilter.toLowerCase())
         : true;
       const matchesCategory = categoryFilter !== 'All Categories'
         ? job.category === categoryFilter
@@ -580,69 +586,81 @@ function JobsContent() {
     <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
         <div className={cn("md:col-span-4 flex flex-col gap-4 min-h-0", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="flex flex-row items-center justify-between gap-4">
                 <div>
                 <h1 className="text-xl font-headline font-bold">Job Search</h1>
                 <p className="text-sm text-muted-foreground">Find your next project.</p>
                 </div>
-                <div className="flex-shrink-0 md:self-end">
+                <div className="flex-shrink-0">
                     <PostJobDialog onJobPosted={() => setIsDialogOpen(false)} />
                 </div>
             </div>
-            <div className="border shadow-sm rounded-lg p-4 space-y-4">
-                 <div className="grid gap-2">
-                    <Label htmlFor="location">Location</Label>
-                    <LocationCombobox value={locationFilter} onChange={setLocationFilter} />
+            <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen} className="border shadow-sm rounded-lg">
+                <div className="p-4">
+                     <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between md:hidden">
+                            <span>{isFilterOpen ? 'Hide' : 'Show'} Filters</span>
+                            <SlidersHorizontal className="h-4 w-4" />
+                        </Button>
+                    </CollapsibleTrigger>
                 </div>
-                 <div className="grid gap-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                    <SelectTrigger id="category">
-                        <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="All Categories">All Categories</SelectItem>
-                        {JOB_CATEGORIES.map(category => (
-                            <SelectItem key={category} value={category}>{category}</SelectItem>
-                        ))}
-                    </SelectContent>
-                    </Select>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="price">Price</Label>
-                        <Select value={priceFilter} onValueChange={setPriceFilter}>
-                            <SelectTrigger id="price">
-                                <SelectValue placeholder="All Prices" />
+                <CollapsibleContent>
+                    <div className="p-4 pt-0 space-y-4">
+                         <div className="grid gap-2">
+                            <Label htmlFor="location">Location</Label>
+                            <LocationCombobox value={locationFilter} onChange={setLocationFilter} />
+                        </div>
+                         <div className="grid gap-2">
+                            <Label htmlFor="category">Category</Label>
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                            <SelectTrigger id="category">
+                                <SelectValue placeholder="All Categories" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="All Prices">All Prices</SelectItem>
-                                <SelectItem value="0-100">£0 - £100</SelectItem>
-                                <SelectItem value="100-500">£100 - £500</SelectItem>
-                                <SelectItem value="500-1000">£500 - £1000</SelectItem>
-                                <SelectItem value="1000">£1000+</SelectItem>
+                                <SelectItem value="All Categories">All Categories</SelectItem>
+                                {JOB_CATEGORIES.map(category => (
+                                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                                ))}
                             </SelectContent>
-                        </Select>
+                            </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="price">Price</Label>
+                                <Select value={priceFilter} onValueChange={setPriceFilter}>
+                                    <SelectTrigger id="price">
+                                        <SelectValue placeholder="All Prices" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="All Prices">All Prices</SelectItem>
+                                        <SelectItem value="0-100">£0 - £100</SelectItem>
+                                        <SelectItem value="100-500">£100 - £500</SelectItem>
+                                        <SelectItem value="500-1000">£500 - £1000</SelectItem>
+                                        <SelectItem value="1000">£1000+</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                             <div className="grid gap-2">
+                                <Label htmlFor="job-type">Job Type</Label>
+                                <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+                                    <SelectTrigger id="job-type">
+                                        <SelectValue placeholder="All Types" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="All Types">All Types</SelectItem>
+                                        <SelectItem value="Remote">Remote</SelectItem>
+                                        <SelectItem value="On-site">On-site</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <Button variant="ghost" onClick={handleResetFilters} className="w-full text-muted-foreground">
+                            <RotateCcw className="mr-2 h-4 w-4"/>
+                            Reset Filters
+                        </Button>
                     </div>
-                     <div className="grid gap-2">
-                        <Label htmlFor="job-type">Job Type</Label>
-                        <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
-                            <SelectTrigger id="job-type">
-                                <SelectValue placeholder="All Types" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="All Types">All Types</SelectItem>
-                                <SelectItem value="Remote">Remote</SelectItem>
-                                <SelectItem value="On-site">On-site</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-                <Button variant="ghost" onClick={handleResetFilters} className="w-full text-muted-foreground">
-                    <RotateCcw className="mr-2 h-4 w-4"/>
-                    Reset Filters
-                </Button>
-            </div>
+                 </CollapsibleContent>
+            </Collapsible>
              <ScrollArea className="flex-1 -mr-6 pr-6">
                 <div className="space-y-4">
                     {loading ? (
