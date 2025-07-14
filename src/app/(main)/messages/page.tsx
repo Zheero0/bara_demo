@@ -1,26 +1,23 @@
+'use client';
 import Link from "next/link"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
-import { conversations, currentUser } from "@/lib/data"
-import { SendHorizonal, Pilcrow, MessageSquareText } from "lucide-react"
+import { conversations } from "@/lib/data"
+import { MessageSquareText } from "lucide-react"
 
 export default function MessagesPage() {
-    const selectedConversation = conversations[0];
+
   return (
-    <div className="grid w-full min-h-[calc(100vh-8rem)] grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid w-full h-full grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <Card className="col-span-1 md:col-span-1 lg:col-span-1 flex flex-col">
             <CardHeader>
                 <CardTitle className="font-headline">Conversations</CardTitle>
             </CardHeader>
-            <Separator />
             <CardContent className="p-0 flex-1 overflow-y-auto">
                 <div className="flex flex-col">
-                    {conversations.map((convo, index) => (
-                        <Link href={`/messages/${convo.id}`} key={convo.id} className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50 ${index === 0 ? 'bg-muted md:bg-muted' : ''}`}>
-                            <Avatar>
+                    {conversations.map((convo) => (
+                        <Link href={`/messages/${convo.id}`} key={convo.id} className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50`}>
+                             <Avatar>
                                 <AvatarImage src={convo.user.avatar} />
                                 <AvatarFallback>{convo.user.name.charAt(0)}</AvatarFallback>
                             </Avatar>

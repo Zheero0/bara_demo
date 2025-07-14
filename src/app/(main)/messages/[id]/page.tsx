@@ -1,3 +1,4 @@
+
 'use client';
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -7,8 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { conversations, currentUser } from "@/lib/data"
 import { SendHorizonal, ArrowLeft } from "lucide-react"
+import { useRouter } from "next/navigation";
 
 export default function ConversationPage({ params }: { params: { id: string } }) {
+    const router = useRouter();
     const selectedConversation = conversations.find(c => c.id === params.id);
 
     if (!selectedConversation) {
@@ -26,11 +29,10 @@ export default function ConversationPage({ params }: { params: { id: string } })
     <div className="h-full flex flex-col">
             <Card className="flex-1 flex flex-col">
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <Link href="/messages" className="md:hidden mr-2">
-                        <Button variant="ghost" size="icon">
-                            <ArrowLeft className="w-5 h-5" />
-                        </Button>
-                    </Link>
+                    <Button variant="ghost" size="icon" className="md:hidden" onClick={() => router.back()}>
+                        <ArrowLeft className="w-5 h-5" />
+                        <span className="sr-only">Back</span>
+                    </Button>
                     <Avatar>
                         <AvatarImage src={selectedConversation.user.avatar} />
                         <AvatarFallback>{selectedConversation.user.name.charAt(0)}</AvatarFallback>
