@@ -26,7 +26,7 @@ export default function ConversationPage({ params }: { params: { id: string } })
     <div className="h-full flex flex-col">
             <Card className="flex-1 flex flex-col">
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <Link href="/messages" className="md:hidden">
+                    <Link href="/messages" className="md:hidden mr-2">
                         <Button variant="ghost" size="icon">
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
