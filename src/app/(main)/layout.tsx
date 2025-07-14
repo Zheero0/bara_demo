@@ -7,6 +7,7 @@ import {
   Menu,
   MessageSquare,
   Search,
+  Settings,
   User,
   Users,
 } from "lucide-react"
@@ -62,6 +63,10 @@ export default function MainLayout({
                 <User className="h-4 w-4" />
                 Profile
               </NavLink>
+               <NavLink href="/settings">
+                <Settings className="h-4 w-4" />
+                Settings
+              </NavLink>
             </nav>
           </div>
           <div className="mt-auto p-4">
@@ -116,6 +121,10 @@ export default function MainLayout({
                 <NavLink href="/profile" variant="mobile">
                   <User className="h-5 w-5" />
                   Profile
+                </NavLink>
+                 <NavLink href="/settings" variant="mobile">
+                  <Settings className="h-5 w-5" />
+                  Settings
                 </NavLink>
               </nav>
               <div className="mt-auto">
