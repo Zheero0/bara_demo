@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState, useMemo, Suspense } from "react"
-import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc } from "firebase/firestore"
+import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc, getDoc as getFirestoreDoc } from "firebase/firestore"
 import { db } from "@/lib/firebase"
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -246,7 +246,7 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
             
             // 3. Update the conversation document's lastMessage with the actual timestamp
             // from the newly created message. This avoids race conditions.
-            const newMessageSnap = await getDoc(newMessageDoc);
+            const newMessageSnap = await getFirestoreDoc(newMessageDoc);
             const newMessageData = newMessageSnap.data();
 
             if (newMessageData && newMessageData.timestamp) {
@@ -440,7 +440,6 @@ function JobsContent() {
                                                 {job.postedBy.name}
                                             </CardDescription>
                                         </div>
-                                        <Badge variant="secondary">{job.category}</Badge>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
