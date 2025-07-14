@@ -226,9 +226,13 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
+            // 1. Create a new conversation document reference with a unique ID
             const newConversationRef = doc(collection(db, 'conversations'));
+            conversationId = newConversationRef.id;
+
             const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
 
+            // 2. Set the initial conversation data
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
@@ -238,15 +242,15 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
                 }
             });
 
-            conversationId = newConversationRef.id;
-            
+            // 3. Add the first message to the subcollection
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             const newMessageDoc = await addDoc(messagesRef, {
                 senderId: user.uid,
                 text: initialMessage,
                 timestamp: serverTimestamp(),
             });
-            
+
+            // 4. Update the conversation with the timestamp from the new message
             const newMessageSnap = await getFirestoreDoc(newMessageDoc);
             const newMessageData = newMessageSnap.data();
 
@@ -267,8 +271,9 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
     }
   };
 
+
   return (
-    <Card className="flex flex-col">
+    <Card className="flex flex-col max-h-full">
       <ScrollArea className="flex-1">
         <CardHeader>
           <div className="flex justify-between items-start">
@@ -290,26 +295,26 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         </CardHeader>
         <Separator />
         <CardContent className="pt-6 space-y-6">
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm font-headline">Job Details</h3>
-              <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-2 gap-4">
-                  <div className="flex items-start col-span-1">
-                      <DollarSign className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs font-headline tracking-wider uppercase text-muted-foreground">Job Details</h3>
+              <div className="p-4 bg-muted/50 rounded-lg grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div className="flex items-start col-span-1 space-x-2">
+                      <DollarSign className="w-4 h-4 mt-0.5 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
                           <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
                       </div>
                   </div>
-                  <div className="flex items-start col-span-1">
-                      <Briefcase className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
+                  <div className="flex items-start col-span-1 space-x-2">
+                      <Briefcase className="w-4 h-4 mt-0.5 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Category</p>
                           <p className="font-semibold text-sm">{job.category}</p>
                       </div>
                   </div>
                   {job.createdAt && (
-                      <div className="flex items-start col-span-2">
-                          <Calendar className="w-4 h-4 mr-2 mt-1 text-primary shrink-0" />
+                      <div className="flex items-start col-span-2 space-x-2">
+                          <Calendar className="w-4 h-4 mt-0.5 text-primary shrink-0" />
                           <div>
                               <p className="text-xs text-muted-foreground">Date Posted</p>
                               <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
@@ -399,7 +404,7 @@ function JobsContent() {
   return (
     <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
-        <div className={cn("md:col-span-4 flex flex-col gap-4", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
+        <div className={cn("md:col-span-4 flex flex-col gap-4 min-h-0", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                 <h1 className="text-xl font-headline font-bold">Job Search</h1>
@@ -469,9 +474,9 @@ function JobsContent() {
                                         </DropdownMenu>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-3 pt-0">
+                                <CardContent className="p-3 pt-0 pb-3">
                                     <div className="flex justify-between items-start">
-                                         <p className="text-sm text-muted-foreground pr-4 mt-2">
+                                         <p className="text-sm text-muted-foreground pr-4 mt-1">
                                             {truncateText(job.description, 25)}
                                         </p>
                                         <div className="text-lg font-bold text-primary whitespace-nowrap">${job.price.toLocaleString()}</div>
@@ -486,7 +491,7 @@ function JobsContent() {
         {/* Right Column */}
         <div className={cn("md:col-span-6", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
             {loading ? (
-                <Card className="h-full"><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
+                <Card><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
             ) : selectedJob ? (
                 <JobDetailView job={selectedJob} onBack={() => setMobileView('list')} />
             ) : (
