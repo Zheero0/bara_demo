@@ -22,6 +22,7 @@ import { Separator } from '@/components/ui/separator';
 import { format } from 'date-fns';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import Link from 'next/link';
 
 function JobDetailSkeleton() {
   return (
@@ -66,9 +67,11 @@ export default function JobDetailPage() {
             setJob({ id: jobDocSnap.id, ...jobDocSnap.data() } as Job);
           } else {
             console.log('No such document!');
+            toast({ title: "Job not found", variant: "destructive" });
           }
         } catch (error) {
           console.error("Error fetching job:", error);
+          toast({ title: "Error", description: "Could not fetch job details.", variant: "destructive" });
         } finally {
           setLoading(false);
         }
@@ -78,7 +81,7 @@ export default function JobDetailPage() {
     }
 
     fetchJob();
-  }, [id]);
+  }, [id, toast]);
 
   const handleApply = async () => {
     if (!user || !job) return;
@@ -86,47 +89,50 @@ export default function JobDetailPage() {
     
     try {
         const conversationsRef = collection(db, 'conversations');
-        // Check if a conversation already exists for this job and these two users
+        // A single query with two 'array-contains' clauses on different fields is not supported.
+        // We query for conversations involving the current user and then filter client-side.
         const q = query(conversationsRef, 
-            where('jobId', '==', job.id),
             where('participantIds', 'array-contains', user.uid)
         );
 
         const querySnapshot = await getDocs(q);
-        let conversationId: string | null = null;
+        let existingConversation = null;
         
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            if (data.participantIds.includes(job.postedBy.uid)) {
-                conversationId = doc.id;
+            // Check if this conversation is for the same job and involves the job poster
+            if (data.jobId === job.id && data.participantIds.includes(job.postedBy.uid)) {
+                existingConversation = { id: doc.id, ...data };
             }
         });
 
-        // If no conversation exists, create a new one
-        if (!conversationId) {
+        let conversationId: string;
+
+        if (existingConversation) {
+            conversationId = existingConversation.id;
+        } else {
+            // If no conversation exists, create a new one
             const newConversationRef = doc(conversationsRef);
+            const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
+            
             await setDoc(newConversationRef, {
                 jobId: job.id,
                 participantIds: [user.uid, job.postedBy.uid],
                 createdAt: serverTimestamp(),
+                lastMessage: {
+                    text: initialMessage,
+                    timestamp: serverTimestamp()
+                }
             });
             conversationId = newConversationRef.id;
             
-            // Add an initial message to the conversation
+            // Add an initial message to the new conversation
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             await addDoc(messagesRef, {
                 senderId: user.uid,
-                text: `Hi, I'm interested in applying for the "${job.title}" position.`,
+                text: initialMessage,
                 timestamp: serverTimestamp(),
             });
-
-             // Update last message on conversation
-            await setDoc(doc(db, 'conversations', conversationId), {
-                lastMessage: {
-                    text: `Hi, I'm interested in applying for the "${job.title}" position.`,
-                    timestamp: serverTimestamp()
-                }
-            }, { merge: true });
         }
         
         // Navigate to the conversation
@@ -225,7 +231,7 @@ export default function JobDetailPage() {
         </CardContent>
         <CardFooter>
           {!isJobPoster && (
-            <Button onClick={handleApply} size="lg" disabled={applying}>
+            <Button onClick={handleApply} size="lg" disabled={applying || !user}>
               {applying ? 'Starting conversation...' : 'Apply for this Job'}
             </Button>
           )}
