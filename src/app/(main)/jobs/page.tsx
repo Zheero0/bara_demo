@@ -56,7 +56,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown, RotateCcw } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -117,12 +117,12 @@ function LocationCombobox({ value, onChange }: { value: string, onChange: (value
           <CommandEmpty>No location found.</CommandEmpty>
           <CommandList>
             <CommandGroup>
-              {CITIES.map((city) => (
+              {CITIES.filter(city => city.toLowerCase().includes(searchValue.toLowerCase())).map((city) => (
                 <CommandItem
                   key={city}
                   value={city}
                   onSelect={(currentValue) => {
-                    onChange(currentValue === value ? "" : currentValue)
+                    onChange(currentValue.toLowerCase() === value.toLowerCase() ? "" : city)
                     setOpen(false)
                   }}
                 >
@@ -494,6 +494,7 @@ function EmptyJobView() {
 
 function JobsContent() {
   const { user } = useAuth();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('q') || '';
   const [locationFilter, setLocationFilter] = useState('');
@@ -566,6 +567,14 @@ function JobsContent() {
     return text.substring(0, maxLength) + '...';
   };
 
+  const handleResetFilters = () => {
+    router.push('/jobs'); // Clears the '?q=' param from URL
+    setLocationFilter('');
+    setCategoryFilter('All Categories');
+    setPriceFilter('All Prices');
+    setJobTypeFilter('All Types');
+  };
+
 
   return (
     <div className="grid md:grid-cols-10 gap-6 h-full">
@@ -629,6 +638,10 @@ function JobsContent() {
                         </Select>
                     </div>
                 </div>
+                <Button variant="ghost" onClick={handleResetFilters} className="w-full text-muted-foreground">
+                    <RotateCcw className="mr-2 h-4 w-4"/>
+                    Reset Filters
+                </Button>
             </div>
              <ScrollArea className="flex-1 -mr-6 pr-6">
                 <div className="space-y-4">
