@@ -35,6 +35,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { useAuth } from "@/hooks/use-auth"
@@ -43,7 +56,7 @@ import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin } from "lucide-react"
+import { Briefcase, Calendar, PoundSterling, BriefcaseBusiness, ArrowLeft, MoreHorizontal, Flag, Settings, User, MapPin, Check, ChevronsUpDown } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,19 +67,72 @@ import { format } from "date-fns"
 import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { CITIES } from "@/lib/cities";
 
 const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
   category: z.string().min(1, "Please select a category."),
   price: z.coerce.number().min(1, "Price must be greater than 0."),
-  location: z.string().min(2, "Please specify a location or 'Remote'.").max(50, "Location must be 50 characters or less."),
+  location: z.string().min(2, "Please specify a location.").max(50, "Location must be 50 characters or less."),
   description: z.string().min(20, "Description must be at least 20 characters long."),
 });
+
+function LocationCombobox({ value, onChange }: { value: string, onChange: (value: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState("")
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between"
+        >
+          {value
+            ? CITIES.find((city) => city.toLowerCase() === value.toLowerCase()) || "Select location..."
+            : "Select location..."}
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-full p-0">
+        <Command>
+          <CommandInput placeholder="Search location..." value={searchValue} onValueChange={setSearchValue} />
+          <CommandEmpty>No location found.</CommandEmpty>
+          <CommandList>
+            <CommandGroup>
+              {CITIES.map((city) => (
+                <CommandItem
+                  key={city}
+                  value={city}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue)
+                    setOpen(false)
+                  }}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      value.toLowerCase() === city.toLowerCase() ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  {city}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const form = useForm<z.infer<typeof jobSchema>>({
     resolver: zodResolver(jobSchema),
@@ -99,6 +165,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
       toast({ title: "Job Posted!", description: "Your job has been successfully posted." });
       form.reset();
       onJobPosted();
+      setIsDialogOpen(false);
     } catch (error) {
       console.error("Error posting job: ", error);
       toast({ title: "Error", description: "There was an error posting your job. Please try again.", variant: "destructive" });
@@ -108,9 +175,9 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
   }
 
   return (
-    <Dialog onOpenChange={(open) => !open && form.reset()}>
+    <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if(!open) form.reset();}}>
       <DialogTrigger asChild>
-        <Button size="sm">Post a Job</Button>
+        <Button size="sm" onClick={() => setIsDialogOpen(true)}>Post a Job</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
@@ -174,18 +241,18 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
                   )}
                 />
                  <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Manchester or Remote" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                           <LocationCombobox value={field.value} onChange={field.onChange} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
             </div>
             <FormField
               control={form.control}
@@ -468,12 +535,7 @@ function JobsContent() {
             <div className="border shadow-sm rounded-lg p-4 space-y-4">
                  <div className="grid gap-2">
                     <Label htmlFor="location">Location</Label>
-                    <Input 
-                      id="location"
-                      placeholder="City or 'Remote'"
-                      value={locationFilter}
-                      onChange={(e) => setLocationFilter(e.target.value)}
-                    />
+                    <LocationCombobox value={locationFilter} onChange={setLocationFilter} />
                 </div>
                  <div className="grid gap-2">
                     <Label htmlFor="category">Category</Label>
