@@ -107,13 +107,13 @@ export default function JobDetailPage() {
         });
 
         let conversationId: string;
-
+        const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
+        
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
             // If no conversation exists, create a new one
             const newConversationRef = doc(collection(db, 'conversations'));
-            const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
             
             await setDoc(newConversationRef, {
                 jobId: job.id,
