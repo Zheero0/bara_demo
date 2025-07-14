@@ -47,7 +47,6 @@ export default function SettingsPage() {
         location: profile?.location || "",
         about: profile?.about || "",
     },
-    // reValidateMode: "onChange",
   });
 
   async function onSubmit(values: z.infer<typeof profileSchema>) {
@@ -58,20 +57,17 @@ export default function SettingsPage() {
     setFormLoading(true);
     try {
         const userRef = doc(db, "users", user.uid);
-        // We use setDoc with merge:true to create the document if it doesn't exist, or update it if it does.
         await setDoc(userRef, {
             ...values,
             email: user.email // ensure email is always stored
         }, { merge: true });
 
-        // Also update the display name in Firebase Auth profile itself
         if (auth.currentUser && auth.currentUser.displayName !== values.name) {
-             // This is a native Firebase function, not the one from our hook
              await updateFirebaseProfile(auth.currentUser, { displayName: values.name });
         }
 
         toast({ title: "Profile Updated", description: "Your profile has been saved successfully." });
-        reloadProfile(); // Refresh the profile data in our auth context
+        reloadProfile();
     } catch (error) {
         console.error("Error updating profile: ", error);
         toast({ title: "Error", description: "Could not update your profile. Please try again.", variant: "destructive" });
@@ -80,26 +76,22 @@ export default function SettingsPage() {
     }
   }
 
-  if (authLoading) {
-      return (
-           <Card>
-                <CardHeader>
-                    <Skeleton className="h-6 w-1/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                     <Skeleton className="h-10 w-full" />
-                     <Skeleton className="h-10 w-full" />
-                     <Skeleton className="h-24 w-full" />
-                </CardContent>
-                <CardFooter className="border-t px-6 py-4">
-                    <Skeleton className="h-10 w-24" />
-                </CardFooter>
-            </Card>
-      );
-  }
-
-  return (
+  return authLoading ? (
+    <Card>
+      <CardHeader>
+        <Skeleton className="h-6 w-1/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-24 w-full" />
+      </CardContent>
+      <CardFooter className="border-t px-6 py-4">
+        <Skeleton className="h-10 w-24" />
+      </CardFooter>
+    </Card>
+  ) : (
     <>
       <div className="mb-4">
         <h1 className="text-3xl font-headline font-bold">Settings</h1>
@@ -194,7 +186,7 @@ export default function SettingsPage() {
               <CardTitle>Account</CardTitle>
               <CardDescription>
                 Manage your account settings.
-              </Description>
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-2">
@@ -265,7 +257,7 @@ export default function SettingsPage() {
               <CardTitle>Appearance</CardTitle>
               <CardDescription>
                 Customize the look and feel of the application.
-              </Description>
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="flex items-center justify-between space-x-2">
@@ -285,5 +277,5 @@ export default function SettingsPage() {
         </TabsContent>
       </Tabs>
     </>
-  )
+  );
 }
