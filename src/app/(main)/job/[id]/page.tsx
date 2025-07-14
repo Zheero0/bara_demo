@@ -89,30 +89,30 @@ export default function JobDetailPage() {
     
     try {
         const conversationsRef = collection(db, 'conversations');
-        // A single query with two 'array-contains' clauses on different fields is not supported.
-        // We query for conversations involving the current user and then filter client-side.
+        // Query for conversations involving the current user and for the specific job
         const q = query(conversationsRef, 
-            where('participantIds', 'array-contains', user.uid)
+            where('participantIds', 'array-contains', user.uid),
+            where('jobId', '==', job.id)
         );
 
         const querySnapshot = await getDocs(q);
         let existingConversation: { id: string, [key: string]: any } | null = null;
         
+        // Filter client-side for the one with the job poster
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            // Check if this conversation is for the same job and involves the job poster
-            if (data.jobId === job.id && data.participantIds.includes(job.postedBy.uid)) {
+            if (data.participantIds.includes(job.postedBy.uid)) {
                 existingConversation = { id: doc.id, ...data };
             }
         });
 
         let conversationId: string;
-        const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
         
         if (existingConversation) {
             conversationId = existingConversation.id;
         } else {
             // If no conversation exists, create a new one
+            const initialMessage = `Hi, I'm interested in applying for the "${job.title}" position.`;
             const newConversationRef = doc(collection(db, 'conversations'));
             
             await setDoc(newConversationRef, {
@@ -127,7 +127,7 @@ export default function JobDetailPage() {
             });
             conversationId = newConversationRef.id;
             
-            // Add an initial message to the new conversation
+            // Add the initial message to the new conversation's subcollection
             const messagesRef = collection(db, `conversations/${conversationId}/messages`);
             await addDoc(messagesRef, {
                 senderId: user.uid,
