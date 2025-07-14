@@ -389,6 +389,12 @@ function JobsContent() {
       setMobileView('detail');
   }
 
+  const truncateText = (text: string, maxLength: number) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+  };
+
+
   return (
     <div className="grid md:grid-cols-10 gap-6 h-full">
         {/* Left Column */}
@@ -431,7 +437,7 @@ function JobsContent() {
                                 className={`cursor-pointer transition-all ${selectedJob?.id === job.id ? 'border-primary' : ''}`}
                                 onClick={() => handleJobSelect(job)}
                             >
-                                <CardHeader className="p-4">
+                                <CardHeader className="p-4 pt-4 pb-2">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <CardTitle className="font-headline text-base mb-1 line-clamp-1">{job.title}</CardTitle>
@@ -444,8 +450,8 @@ function JobsContent() {
                                 </CardHeader>
                                 <CardContent className="p-4 pt-0">
                                     <div className="flex justify-between items-start">
-                                         <p className="text-sm text-muted-foreground line-clamp-2 pr-4">
-                                            {job.description}
+                                         <p className="text-sm text-muted-foreground pr-4">
+                                            {truncateText(job.description, 25)}
                                         </p>
                                         <div className="text-lg font-bold text-primary whitespace-nowrap">${job.price.toLocaleString()}</div>
                                     </div>
