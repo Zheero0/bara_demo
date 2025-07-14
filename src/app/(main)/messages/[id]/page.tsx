@@ -161,7 +161,7 @@ export default function ConversationPage() {
   return (
     <div className="h-full flex flex-col">
             <Card className="flex-1 flex flex-col">
-                <CardHeader className="flex flex-row items-center gap-4 p-4 border-b">
+                <CardHeader className="flex flex-row items-center gap-4 p-4 border-b sticky top-0 bg-background z-10">
                     <Button variant="ghost" size="icon" onClick={() => router.push('/messages')} className="shrink-0">
                         <ArrowLeft className="w-5 h-5" />
                         <span className="sr-only">Back</span>

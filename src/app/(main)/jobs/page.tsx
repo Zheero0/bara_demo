@@ -297,24 +297,24 @@ function JobDetailView({ job, onBack }: { job: Job, onBack: () => void }) {
         <CardContent className="pt-6 space-y-6">
             <div className="space-y-2">
               <h3 className="font-semibold text-xs font-headline tracking-wider uppercase text-muted-foreground">Job Details</h3>
-              <div className="p-4 border rounded-lg space-y-2">
-                  <div className="flex items-start space-x-2">
-                      <DollarSign className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+              <div className="p-4 border rounded-lg space-y-4">
+                  <div className="flex items-center space-x-2">
+                      <DollarSign className="w-4 h-4 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Price</p>
                           <p className="font-semibold text-sm">${job.price.toLocaleString()}</p>
                       </div>
                   </div>
-                  <div className="flex items-start space-x-2">
-                      <Briefcase className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                  <div className="flex items-center space-x-2">
+                      <Briefcase className="w-4 h-4 text-primary shrink-0" />
                       <div>
                           <p className="text-xs text-muted-foreground">Category</p>
                           <p className="font-semibold text-sm">{job.category}</p>
                       </div>
                   </div>
                   {job.createdAt && (
-                      <div className="flex items-start space-x-2">
-                          <Calendar className="w-4 h-4 mt-0.5 text-primary shrink-0" />
+                      <div className="flex items-center space-x-2">
+                          <Calendar className="w-4 h-4 text-primary shrink-0" />
                           <div>
                               <p className="text-xs text-muted-foreground">Date Posted</p>
                               <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
