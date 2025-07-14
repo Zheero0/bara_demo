@@ -53,6 +53,12 @@ export const jobs: Job[] = [
   { id: 'job-4', title: 'Content Writer for Tech Blog', category: 'Writing', price: 1500, description: 'Write 4 high-quality blog posts per month about software development trends.', postedBy: { name: 'Tech Weekly', avatar: '/avatars/company-4.png' } },
   { id: 'job-5', title: 'React Native Developer for MVP', category: 'Mobile Development', price: 6000, description: 'Develop a cross-platform MVP for a new social networking app.', postedBy: { name: 'ConnectApp', avatar: '/avatars/company-5.png' } },
   { id: 'job-6', title: 'Data Visualization Dashboard', category: 'Data Science', price: 4500, description: 'Create an interactive data dashboard using D3.js or a similar library to visualize sales data.', postedBy: { name: 'Analytics Corp', avatar: '/avatars/company-1.png' } },
+  { id: 'job-1', title: 'E-commerce Website Redesign', category: 'Web Development', price: 5000, description: 'We are looking for an experienced developer to redesign our Shopify store. Must have a strong portfolio.', postedBy: { name: 'Fashion Co.', avatar: '/avatars/company-1.png' } },
+  { id: 'job-2', title: 'Mobile App UI/UX Design', category: 'Design', price: 3500, description: 'Design a new mobile application for a fitness startup. Experience with Figma is required.', postedBy: { name: 'FitLife App', avatar: '/avatars/company-2.png' } },
+  { id: 'job-3', title: 'Cloud Infrastructure Setup', category: 'DevOps', price: 7000, description: 'Setup a scalable and secure cloud infrastructure on AWS for our growing SaaS platform.', postedBy: { name: 'SaaS Inc.', avatar: '/avatars/company-3.png' } },
+  { id: 'job-4', title: 'Content Writer for Tech Blog', category: 'Writing', price: 1500, description: 'Write 4 high-quality blog posts per month about software development trends.', postedBy: { name: 'Tech Weekly', avatar: '/avatars/company-4.png' } },
+  { id: 'job-5', title: 'React Native Developer for MVP', category: 'Mobile Development', price: 6000, description: 'Develop a cross-platform MVP for a new social networking app.', postedBy: { name: 'ConnectApp', avatar: '/avatars/company-5.png' } },
+  { id: 'job-6', title: 'Data Visualization Dashboard', category: 'Data Science', price: 4500, description: 'Create an interactive data dashboard using D3.js or a similar library to visualize sales data.', postedBy: { name: 'Analytics Corp', avatar: '/avatars/company-1.png' } },
 ];
 
 export const connections: Connection[] = [

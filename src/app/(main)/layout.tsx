@@ -1,3 +1,5 @@
+'use client';
+import { NavLink } from "@/components/nav-link";
 import Link from "next/link"
 import {
   Briefcase,
@@ -41,37 +43,25 @@ export default function MainLayout({
           </div>
           <div className="flex-1">
             <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
+              <NavLink href="/dashboard">
                 <Home className="h-4 w-4" />
                 Dashboard
-              </Link>
-              <Link
-                href="/messages"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
+              </NavLink>
+              <NavLink href="/messages">
                 <MessageSquare className="h-4 w-4" />
                 Messages
                 <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                   3
                 </Badge>
-              </Link>
-              <Link
-                href="/connections"
-                className="flex items-center gap-3 rounded-lg bg-muted px-3 py-2 text-primary transition-all hover:text-primary"
-              >
+              </NavLink>
+              <NavLink href="/connections">
                 <Users className="h-4 w-4" />
-                Connections{" "}
-              </Link>
-              <Link
-                href="/profile"
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary"
-              >
+                Connections
+              </NavLink>
+              <NavLink href="/profile">
                 <User className="h-4 w-4" />
                 Profile
-              </Link>
+              </NavLink>
             </nav>
           </div>
           <div className="mt-auto p-4">
@@ -108,37 +98,25 @@ export default function MainLayout({
             <SheetContent side="left" className="flex flex-col">
               <nav className="grid gap-2 text-lg font-medium">
                 <Logo />
-                <Link
-                  href="/dashboard"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
+                <NavLink href="/dashboard" variant="mobile">
                   <Home className="h-5 w-5" />
                   Dashboard
-                </Link>
-                <Link
-                  href="/messages"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl bg-muted px-3 py-2 text-foreground hover:text-foreground"
-                >
+                </NavLink>
+                <NavLink href="/messages" variant="mobile">
                   <MessageSquare className="h-5 w-5" />
                   Messages
                   <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
                     3
                   </Badge>
-                </Link>
-                <Link
-                  href="/connections"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
+                </NavLink>
+                <NavLink href="/connections" variant="mobile">
                   <Users className="h-5 w-5" />
                   Connections
-                </Link>
-                <Link
-                  href="/profile"
-                  className="mx-[-0.65rem] flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground"
-                >
+                </NavLink>
+                <NavLink href="/profile" variant="mobile">
                   <User className="h-5 w-5" />
                   Profile
-                </Link>
+                </NavLink>
               </nav>
               <div className="mt-auto">
                 <Card>
