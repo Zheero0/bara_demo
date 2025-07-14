@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Job } from "@/lib/data";
-import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag } from "lucide-react";
+import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag, Settings } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -104,7 +104,10 @@ export default function ProfilePage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link href="/settings">Manage Account</Link>
+                    <Link href="/settings">
+                      <Settings className="mr-2 h-4 w-4" />
+                      Manage
+                    </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem>
