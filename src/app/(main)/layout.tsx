@@ -138,7 +138,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="mt-auto p-4">
             <Card>
               <CardHeader className="p-2 pt-0 md:p-4">
-                <CardTitle className="font-headline">Upgrade to Pro</CardTitle>
+                <CardTitle className="font-headline text-base">Upgrade to Pro</CardTitle>
                 <CardDescription>
                   Unlock all features and get unlimited access to our support
                   team.
@@ -196,7 +196,7 @@ function MainLayoutContent({ children }: { children: React.ReactNode }) {
               <div className="mt-auto">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="font-headline">Upgrade to Pro</CardTitle>
+                    <CardTitle className="font-headline text-base">Upgrade to Pro</CardTitle>
                     <CardDescription>
                       Unlock all features and get unlimited access to our
                       support team.
