@@ -33,7 +33,7 @@ export default function LandingPage() {
               <Link href="/login">
                 <Button variant="ghost">Login</Button>
               </Link>
-              <Link href="/login">
+              <Link href="/signup">
                 <Button>Sign Up</Button>
               </Link>
             </>
