@@ -10,12 +10,12 @@ export default function MessagesPage() {
     const selectedConversation = conversations[0];
   return (
     <div className="grid w-full min-h-[calc(100vh-8rem)] grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <Card className="col-span-1 md:col-span-1 lg:col-span-1">
+        <Card className="col-span-1 md:col-span-1 lg:col-span-1 flex flex-col">
             <CardHeader>
                 <CardTitle className="font-headline">Conversations</CardTitle>
             </CardHeader>
             <Separator />
-            <CardContent className="p-0">
+            <CardContent className="p-0 flex-1 overflow-y-auto">
                 <div className="flex flex-col">
                     {conversations.map((convo, index) => (
                         <div key={convo.id} className={`flex items-center gap-3 p-4 cursor-pointer hover:bg-muted/50 ${index === 0 ? 'bg-muted' : ''}`}>
@@ -23,11 +23,11 @@ export default function MessagesPage() {
                                 <AvatarImage src={convo.user.avatar} />
                                 <AvatarFallback>{convo.user.name.charAt(0)}</AvatarFallback>
                             </Avatar>
-                            <div className="flex-1">
-                                <p className="font-semibold">{convo.user.name}</p>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold truncate">{convo.user.name}</p>
                                 <p className="text-sm text-muted-foreground truncate">{convo.lastMessage}</p>
                             </div>
-                            <span className="text-xs text-muted-foreground">{convo.lastMessageTimestamp}</span>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">{convo.lastMessageTimestamp}</span>
                         </div>
                     ))}
                 </div>
