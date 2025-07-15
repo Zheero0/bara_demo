@@ -1,16 +1,16 @@
 
 'use client';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { type Job, type User as ProfileData } from "@/lib/data";
-import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag, Edit, Briefcase } from "lucide-react";
+import { Mail, MapPin, UserPlus, MoreHorizontal, ShieldX, Flag, Edit, Briefcase, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { collection, query, where, onSnapshot, getDoc, doc } from "firebase/firestore";
+import { collection, query, where, onSnapshot, getDoc, doc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/hooks/use-auth";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +22,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 
 function ProfileSkeleton() {
@@ -61,6 +73,7 @@ export default function ProfilePage() {
   const [profileLoading, setProfileLoading] = useState(true);
   const [userJobs, setUserJobs] = useState<Job[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
+  const [jobToDelete, setJobToDelete] = useState<string | null>(null);
 
   const isOwnProfile = currentUser?.uid === profileId;
 
@@ -100,6 +113,18 @@ export default function ProfilePage() {
 
     return () => unsubscribeProfile();
   }, [profileId, router]);
+  
+  const handleDeleteJob = async () => {
+    if (!jobToDelete) return;
+    try {
+      await deleteDoc(doc(db, "jobs", jobToDelete));
+      toast.success("Job Deleted", { description: "The job posting has been removed." });
+      setJobToDelete(null);
+    } catch (error) {
+      console.error("Error deleting job: ", error);
+      toast.error("Error", { description: "Could not delete the job. Please try again." });
+    }
+  };
 
 
   if (profileLoading || !profile) {
@@ -107,6 +132,7 @@ export default function ProfilePage() {
   }
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       <Card>
         <CardHeader className="relative h-32 md:h-48 bg-muted rounded-t-lg">
@@ -147,7 +173,7 @@ export default function ProfilePage() {
                         </DropdownMenuItem>
                         <DropdownMenuItem className="text-destructive">
                             <ShieldX className="mr-2 h-4 w-4" />
-                            Block User 
+                            Block User
                         </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -195,6 +221,21 @@ export default function ProfilePage() {
                                                 <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4" />{job.location}</span>
                                             </div>
                                         </div>
+                                         {isOwnProfile && (
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onSelect={() => setJobToDelete(job.id)} className="text-destructive">
+                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                        Delete Job
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        )}
                                     </div>
                                 </CardHeader>
                                 <CardContent>
@@ -232,5 +273,23 @@ export default function ProfilePage() {
         </TabsContent>
       </Tabs>
     </div>
+
+    <AlertDialog open={!!jobToDelete} onOpenChange={(open) => !open && setJobToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete this job
+              posting.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteJob} className={cn(buttonVariants({ variant: "destructive" }))}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
+ 

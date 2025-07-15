@@ -1,10 +1,10 @@
 
 'use client';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUserWithEmailAndPassword, updateProfile, getRedirectResult } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
-import { auth, db, googleProvider, signInWithRedirect } from '@/lib/firebase';
+import { auth, db, googleProvider, signInWithPopup } from '@/lib/firebase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import Logo from '@/components/logo';
 import { toast } from 'sonner';
 import Link from 'next/link';
-import { useAuth } from '@/hooks/use-auth';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48" {...props}>
@@ -29,52 +28,38 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(true);
-  const { user } = useAuth();
-
-  const defaultAvatar = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' class='feather feather-user'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E`;
-
-  useEffect(() => {
-    if (user) {
-        router.push('/jobs');
-        return;
-    }
-     const handleRedirectResult = async () => {
-        try {
-            const result = await getRedirectResult(auth);
-            if (result) {
-                const user = result.user;
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDocSnap = await getDoc(userDocRef);
-
-                if (!userDocSnap.exists()) {
-                    await setDoc(userDocRef, {
-                        name: user.displayName,
-                        email: user.email,
-                        avatar: user.photoURL || defaultAvatar,
-                        plan: 'Free',
-                        headline: "",
-                        location: "",
-                        about: "",
-                    });
-                }
-                router.push('/jobs');
-            } else {
-                 setGoogleLoading(false);
-            }
-        } catch (error: any) {
-            toast.error('Google Sign-Up Failed', { description: error.message });
-            console.error('Google Sign-Up error:', error);
-            setGoogleLoading(false);
-        }
-    };
-    handleRedirectResult();
-  }, [user, router, defaultAvatar]);
-
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    await signInWithRedirect(auth, googleProvider);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      const userDocRef = doc(db, 'users', user.uid);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (!userDocSnap.exists()) {
+        await setDoc(userDocRef, {
+          name: user.displayName,
+          email: user.email,
+          avatar: user.photoURL || `https://placehold.co/100x100.png`,
+          plan: 'Free', // Default to Free plan
+          headline: "",
+          location: "",
+          about: "",
+        });
+      }
+
+      router.push('/jobs');
+    } catch (error: any) {
+      toast.error('Google Sign-In Failed', {
+        description: error.message,
+      });
+      console.error('Google Sign-In error:', error);
+    } finally {
+      setGoogleLoading(false);
+    }
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -85,13 +70,13 @@ export default function SignUpPage() {
       const user = userCredential.user;
 
       // Update Firebase auth profile
-      await updateProfile(user, { displayName: name, photoURL: defaultAvatar });
+      await updateProfile(user, { displayName: name });
 
       // Create user document in Firestore
       await setDoc(doc(db, "users", user.uid), {
         name: name,
         email: user.email,
-        avatar: defaultAvatar,
+        avatar: `https://placehold.co/100x100.png`,
         plan: 'Free', // Default to Free plan
         headline: "",
         location: "",
@@ -108,10 +93,6 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
-
-  if (user) {
-      return null;
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30">

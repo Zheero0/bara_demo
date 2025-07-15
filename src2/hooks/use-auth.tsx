@@ -23,8 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const defaultAvatar = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' class='feather feather-user'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E`;
-
   const fetchProfile = useCallback(async (firebaseUser: FirebaseUser) => {
     const userDocRef = doc(db, 'users', firebaseUser.uid);
     const userDocSnap = await getDoc(userDocRef);
@@ -36,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: firebaseUser.uid,
         name: firebaseUser.displayName || 'New User',
         email: firebaseUser.email || '',
-        avatar: firebaseUser.photoURL || defaultAvatar,
+        avatar: firebaseUser.photoURL || `https://placehold.co/100x100.png`,
         plan: 'Free',
         headline: '',
         location: '',
@@ -44,7 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
       setProfile(defaultProfile);
     }
-  }, [defaultAvatar]);
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -61,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 id: firebaseUser.uid,
                 name: firebaseUser.displayName || "New User",
                 email: firebaseUser.email || "",
-                avatar: firebaseUser.photoURL || defaultAvatar,
+                avatar: firebaseUser.photoURL || `https://placehold.co/100x100.png`,
                 plan: "Free",
                 headline: "",
                 location: "",
@@ -79,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe(); // Cleanup the auth listener
-  }, [defaultAvatar]);
+  }, []);
 
   const logout = async () => {
     await signOut(auth);

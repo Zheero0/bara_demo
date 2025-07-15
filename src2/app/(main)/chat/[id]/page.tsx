@@ -21,7 +21,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils";
 
 export default function ConversationPage() {
     const router = useRouter();
@@ -161,8 +160,8 @@ export default function ConversationPage() {
 
     if (loading) {
         return (
-             <Card className="flex-1 flex flex-col h-full border-0 shadow-none">
-                <CardHeader className="flex flex-row items-center gap-4 p-4">
+             <Card className="flex-1 flex flex-col h-full">
+                <CardHeader className="flex flex-row items-center gap-4 p-4 border-b">
                      <Button variant="ghost" size="icon" onClick={() => router.push('/chat')}>
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
@@ -184,7 +183,7 @@ export default function ConversationPage() {
     if (!conversation || !otherUser || !job) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                 <Card className="flex-1 flex flex-col items-center justify-center w-full border-0 shadow-none">
+                 <Card className="flex-1 flex flex-col items-center justify-center w-full">
                     <p className="text-lg font-semibold mb-2">Conversation not found</p>
                     <p className="text-muted-foreground mb-4">It might have been deleted or does not exist.</p>
                     <Button asChild variant="outline">
@@ -196,8 +195,8 @@ export default function ConversationPage() {
     }
 
   return (
-    <Card className="flex flex-col h-full border-0 shadow-none">
-      <CardHeader className="flex shrink-0 flex-row items-center gap-4 p-4 bg-background">
+    <Card className="flex flex-col h-full">
+      <CardHeader className="flex shrink-0 flex-row items-center gap-4 p-4 border-b bg-background">
         <Button
           variant="ghost"
           size="icon"
@@ -224,7 +223,7 @@ export default function ConversationPage() {
           return (
             <div
               key={message.id}
-              className={`group flex items-start gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}
+              className={`group flex items-end gap-2 ${isMe ? 'justify-end' : 'justify-start'}`}
             >
               {!isMe && (
                 <Avatar className="w-8 h-8">
@@ -232,28 +231,21 @@ export default function ConversationPage() {
                 </Avatar>
               )}
                <div className={`flex items-center gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
-                 <div className={`flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
-                    <div
-                        className={cn(
-                            "px-4 py-2 max-w-xs lg:max-w-md",
-                            isMe 
-                                ? 'bg-primary text-primary-foreground rounded-bl-lg rounded-br-sm rounded-tl-lg rounded-tr-lg' 
-                                : 'bg-muted rounded-bl-sm rounded-br-lg rounded-tl-lg rounded-tr-lg'
-                        )}
-                    >
-                        <p>{message.text}</p>
-                    </div>
+                 <div
+                    className={`rounded-lg px-4 py-2 max-w-xs lg:max-w-md ${isMe ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                  >
+                    <p>{message.text}</p>
                     <p
-                        className="text-xs text-muted-foreground px-1"
+                      className={`text-xs mt-1 text-right ${isMe ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}
                     >
-                        {message.timestamp
+                      {message.timestamp
                         ? format(message.timestamp.toDate(), 'p')
                         : 'sending...'}
                     </p>
-                 </div>
+                  </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                       <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100 self-center">
+                       <Button variant="ghost" size="icon" className="h-6 w-6 opacity-0 group-hover:opacity-100">
                           <MoreHorizontal className="h-4 w-4" />
                        </Button>
                     </DropdownMenuTrigger>
@@ -282,7 +274,7 @@ export default function ConversationPage() {
         })}
         <div ref={messagesEndRef} />
       </CardContent>
-      <div className="p-4 bg-background shrink-0">
+      <div className="p-4 border-t bg-background shrink-0">
         <form onSubmit={handleSendMessage} className="relative">
           <Input
             placeholder="Type a message..."

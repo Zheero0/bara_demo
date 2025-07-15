@@ -18,7 +18,9 @@ import {
 import { Label } from "@/components/ui/label"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { type Job } from "@/lib/data"
+import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import { Separator } from "@/components/ui/separator"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useEffect, useState, useMemo, Suspense } from "react"
 import { collection, onSnapshot, addDoc, serverTimestamp, doc, setDoc, query, where, getDocs, updateDoc, getDoc as getFirestoreDoc, deleteDoc } from "firebase/firestore"
@@ -82,7 +84,6 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { CITIES } from "@/lib/cities";
-import { Separator } from "@/components/ui/separator";
 
 const jobSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters long."),
@@ -112,16 +113,16 @@ const JOB_CATEGORIES = [
     "Other"
 ];
 
-const getStatusClass = (status: Job['status']) => {
+const getStatusBadgeClass = (status: Job['status']) => {
     switch (status) {
         case 'Open':
-            return 'text-green-600 bg-transparent hover:bg-transparent';
+            return 'bg-green-600';
         case 'In Progress':
-            return 'text-yellow-500 bg-transparent hover:bg-transparent';
+            return 'bg-yellow-500';
         case 'Completed':
-            return 'text-gray-500 bg-transparent hover:bg-transparent';
+            return 'bg-gray-500';
         default:
-            return 'text-muted-foreground bg-transparent hover:bg-transparent';
+            return 'bg-muted';
     }
 }
 
@@ -207,7 +208,7 @@ function PostJobDialog({ onJobPosted }: { onJobPosted: () => void }) {
         postedBy: {
           uid: user.uid,
           name: user.displayName || "Anonymous",
-          avatar: user.photoURL || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23a0aec0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' class='feather feather-user'%3E%3Cpath d='M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2'%3E%3C/path%3E%3Ccircle cx='12' cy='7' r='4'%3E%3C/circle%3E%3C/svg%3E`,
+          avatar: user.photoURL || `https://placehold.co/40x40.png`,
         },
         createdAt: serverTimestamp()
       });
@@ -583,106 +584,111 @@ function JobDetailView({ job, onBack, onManage, onDelete }: { job: Job, onBack: 
 
 
   return (
-    <Card className="flex flex-col max-h-full border-0 shadow-none">
+    <Card className="flex flex-col max-h-full">
       <ScrollArea className="flex-1">
-        <CardHeader className="p-0">
-          <div className="flex justify-between items-start px-6 py-4">
-            <div className="flex items-center gap-2 min-w-0">
-              <Button variant="ghost" size="icon" className="md:hidden -ml-2" onClick={onBack}>
-                  <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                      <CardTitle className="text-3xl font-headline break-words">{job.title}</CardTitle>
-                      <span className={cn("px-1 font-semibold text-xs", getStatusClass(job.status))}>{job.status}</span>
-                  </div>
-                  <CardDescription className="mt-1">
-                      <div className="flex items-center gap-2 text-base">
-                          <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
-                          <span>
-                              Posted by{' '}
-                              <Link href={`/profile/${job.postedBy.uid}`} className="font-medium text-foreground hover:underline">
-                                  {job.postedBy.name}
-                              </Link>
-                          </span>
-                      </div>
-                  </CardDescription>
-              </div>
+        <CardHeader>
+          <div className="flex justify-between items-start">
+             <div className="flex items-center gap-2 min-w-0">
+                <Button variant="ghost" size="icon" className="md:hidden" onClick={onBack}>
+                    <ArrowLeft className="h-5 w-5" />
+                </Button>
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                        <CardTitle className="text-xl font-headline break-words">{job.title}</CardTitle>
+                        <Badge variant={'default'} className={cn(getStatusBadgeClass(job.status))}>{job.status}</Badge>
+                    </div>
+                    <CardDescription className="mt-1">
+                        <div className="flex items-center gap-2 text-xs">
+                            <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
+                            <span>
+                                Posted by{' '}
+                                <Link href={`/profile/${job.postedBy.uid}`} className="font-medium text-foreground hover:underline">
+                                    {job.postedBy.name}
+                                </Link>
+                            </span>
+                        </div>
+                    </CardDescription>
+                </div>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-7 w-7">
-                      <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                      <Link href={`/profile/${job.postedBy.uid}`}>
-                          <User className="mr-2 h-4 w-4" />
-                          Go to user's profile
-                      </Link>
-                  </DropdownMenuItem>
-                  {isJobPoster ? (
-                      <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onSelect={() => onManage(job)}>
-                              <Settings className="mr-2 h-4 w-4" />
-                              Manage Job
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => onDelete(job.id)} className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Job
-                          </DropdownMenuItem>
-                      </>
-                  ) : (
-                          <DropdownMenuItem>
-                          <Flag className="mr-2 h-4 w-4" />
-                          Report Job
-                      </DropdownMenuItem>
-                  )}
-              </DropdownMenuContent>
+             <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-7 w-7">
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                        <Link href={`/profile/${job.postedBy.uid}`}>
+                            <User className="mr-2 h-4 w-4" />
+                            Go to user's profile
+                        </Link>
+                    </DropdownMenuItem>
+                    {isJobPoster ? (
+                        <>
+                           <DropdownMenuSeparator />
+                           <DropdownMenuItem onSelect={() => onManage(job)}>
+                               <Settings className="mr-2 h-4 w-4" />
+                               Manage Job
+                           </DropdownMenuItem>
+                           <DropdownMenuItem onSelect={() => onDelete(job.id)} className="text-destructive">
+                               <Trash2 className="mr-2 h-4 w-4" />
+                               Delete Job
+                           </DropdownMenuItem>
+                        </>
+                    ) : (
+                         <DropdownMenuItem>
+                            <Flag className="mr-2 h-4 w-4" />
+                            Report Job
+                        </DropdownMenuItem>
+                    )}
+                </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 px-6 py-6 border-y">
-                <div className="flex flex-col gap-4 justify-center bg-muted/50 p-6 rounded-lg">
-                    <p className="text-base text-muted-foreground">Price</p>
-                    <p className="text-5xl font-bold">£{job.price.toLocaleString()}</p>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex items-start space-x-3">
-                      <MapPin className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+        <Separator />
+        <CardContent className="pt-6 space-y-6">
+            <div className="space-y-2">
+              <h3 className="font-semibold text-xs font-headline tracking-wider uppercase text-muted-foreground">Job Details</h3>
+              <div className="border rounded-lg space-y-4 p-4">
+                  <div className="flex items-start space-x-2">
+                      <PoundSterling className="w-4 h-4 text-primary shrink-0 mt-1" />
                       <div>
-                          <p className="text-base text-muted-foreground">Location</p>
-                          <p className="font-semibold text-lg">{job.location} ({job.jobType})</p>
+                          <p className="text-xs text-muted-foreground">Price</p>
+                          <p className="font-semibold text-sm">£{job.price.toLocaleString()}</p>
                       </div>
                   </div>
-                   <div className="flex items-start space-x-3">
-                      <Briefcase className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+                   <div className="flex items-start space-x-2">
+                      <MapPin className="w-4 h-4 text-primary shrink-0 mt-1" />
                       <div>
-                          <p className="text-base text-muted-foreground">Category</p>
-                          <p className="font-semibold text-lg">{job.category}</p>
+                          <p className="text-xs text-muted-foreground">Location</p>
+                          <p className="font-semibold text-sm">{job.location} ({job.jobType})</p>
+                      </div>
+                  </div>
+                  <div className="flex items-start space-x-2">
+                      <Briefcase className="w-4 h-4 text-primary shrink-0 mt-1" />
+                      <div>
+                          <p className="text-xs text-muted-foreground">Category</p>
+                          <p className="font-semibold text-sm">{job.category}</p>
                       </div>
                   </div>
                   {job.createdAt && (
-                      <div className="flex items-start space-x-3">
-                          <Calendar className="w-5 h-5 text-muted-foreground shrink-0 mt-1" />
+                      <div className="flex items-start space-x-2">
+                          <Calendar className="w-4 h-4 text-primary shrink-0 mt-1" />
                           <div>
-                              <p className="text-base text-muted-foreground">Date Posted</p>
-                              <p className="font-semibold text-lg">{format(job.createdAt.toDate(), 'PPP')}</p>
+                              <p className="text-xs text-muted-foreground">Date Posted</p>
+                              <p className="font-semibold text-sm">{format(job.createdAt.toDate(), 'PPP')}</p>
                           </div>
                       </div>
                   )}
-                </div>
-            </div>
-             <div className="space-y-4 px-6 pt-6">
-                  <h3 className="font-semibold text-xl font-headline">Job Description</h3>
-                  <p className="text-xl text-muted-foreground whitespace-pre-wrap">{job.description}</p>
               </div>
+            </div>
+            <div className="space-y-4">
+                <h3 className="font-semibold text-base font-headline">Job Description</h3>
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap">{job.description}</p>
+            </div>
         </CardContent>
       </ScrollArea>
-      <CardFooter className="pt-4 px-6">
+      <CardFooter className="border-t pt-4">
           {!isJobPoster && (
             <Button onClick={handleApply} size="sm" disabled={applying || !user || job.status !== 'Open'}>
               {job.status !== 'Open' ? `Job ${job.status}` : applying ? 'Starting conversation...' : 'Apply for this Job'}
@@ -695,94 +701,10 @@ function JobDetailView({ job, onBack, onManage, onDelete }: { job: Job, onBack: 
 
 function EmptyJobView() {
     return (
-        <Card className="h-full flex-col items-center justify-center text-center p-8 hidden md:flex border-0 shadow-none">
+        <Card className="h-full flex-col items-center justify-center text-center p-8 hidden md:flex">
             <BriefcaseBusiness className="w-16 h-16 text-muted-foreground/50 mb-4" />
             <h2 className="text-xl font-semibold">Select a job to view details</h2>
             <p className="text-muted-foreground mt-1">Choose a job from the list on the left to get started.</p>
-        </Card>
-    )
-}
-
-function JobCardSkeleton() {
-    return (
-        <Card className="border-0">
-            <CardHeader className="p-4 pt-4 pb-2">
-                <div className="flex items-start justify-between">
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Skeleton className="h-5 w-3/4" />
-                            <Skeleton className="h-4 w-12" />
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                             <Skeleton className="h-5 w-5 rounded-full" />
-                             <Skeleton className="h-4 w-24" />
-                        </div>
-                    </div>
-                     <Skeleton className="h-6 w-6" />
-                </div>
-            </CardHeader>
-            <CardContent className="p-4 pt-0 pb-4">
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-2/3" />
-                </div>
-                <div className="flex justify-between items-end mt-2">
-                     <div className="flex items-center gap-2 text-xs">
-                        <Skeleton className="h-4 w-4" />
-                        <Skeleton className="h-4 w-28" />
-                    </div>
-                    <Skeleton className="h-7 w-20" />
-                </div>
-            </CardContent>
-        </Card>
-    )
-}
-
-function JobDetailSkeleton() {
-    return (
-        <Card className="flex flex-col h-full border-0 shadow-none">
-            <ScrollArea className="flex-1">
-                <CardHeader className="p-0">
-                    <div className="px-6 py-4 border-b">
-                        <div className="flex justify-between items-start">
-                            <div className="flex-1 space-y-2">
-                                <Skeleton className="h-6 w-3/4" />
-                                <div className="flex items-center gap-2">
-                                    <Skeleton className="h-5 w-5 rounded-full" />
-                                    <Skeleton className="h-4 w-1/3" />
-                                </div>
-                            </div>
-                            <Skeleton className="h-7 w-7" />
-                        </div>
-                    </div>
-                </CardHeader>
-                <CardContent className="pt-0">
-                    <div className="border-t py-6 px-6">
-                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="flex items-start space-x-2">
-                                    <Skeleton className="w-4 h-4 mt-1" />
-                                    <div className="flex-1 space-y-1">
-                                        <Skeleton className="h-3 w-16" />
-                                        <Skeleton className="h-4 w-24" />
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="space-y-4 pt-6 mt-6 border-t">
-                            <Skeleton className="h-5 w-40" />
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-5/6" />
-                            </div>
-                        </div>
-                    </div>
-                </CardContent>
-            </ScrollArea>
-            <CardFooter className="pt-4 px-6">
-                 <Skeleton className="h-9 w-36" />
-            </CardFooter>
         </Card>
     )
 }
@@ -895,114 +817,6 @@ function JobsContent() {
     setJobTypeFilter('All Types');
   };
 
-  const FilterForm = () => (
-    <div className="space-y-4">
-      <div className="grid gap-2">
-        <Label htmlFor="location">Location</Label>
-        <LocationCombobox value={locationFilter} onChange={setLocationFilter} />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="category">Category</Label>
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger id="category">
-            <SelectValue placeholder="All Categories" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="All Categories">All Categories</SelectItem>
-            {JOB_CATEGORIES.map(category => (
-              <SelectItem key={category} value={category}>{category}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="grid grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <Label htmlFor="price">Price</Label>
-          <Select value={priceFilter} onValueChange={setPriceFilter}>
-            <SelectTrigger id="price">
-              <SelectValue placeholder="All Prices" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All Prices">All Prices</SelectItem>
-              <SelectItem value="0-100">£0 - £100</SelectItem>
-              <SelectItem value="100-500">£100 - £500</SelectItem>
-              <SelectItem value="500-1000">£500 - £1000</SelectItem>
-              <SelectItem value="1000">£1000+</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="grid gap-2">
-          <Label htmlFor="job-type">Job Type</Label>
-          <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
-            <SelectTrigger id="job-type">
-              <SelectValue placeholder="All Types" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All Types">All Types</SelectItem>
-              <SelectItem value="Remote">Remote</SelectItem>
-              <SelectItem value="On-site">On-site</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      <Button variant="ghost" onClick={handleResetFilters} className="w-full text-muted-foreground border">
-        <RotateCcw className="mr-2 h-4 w-4"/>
-        Reset Filters
-      </Button>
-    </div>
-  );
-
-  if (loading) {
-      return (
-        <div className="grid md:grid-cols-10 gap-6 h-full">
-            <div className={cn("md:col-span-4 flex flex-col gap-4 min-h-0", mobileView === 'list' ? 'flex' : 'hidden md:flex')}>
-                 <div className="flex flex-row items-center justify-between gap-4">
-                    <div>
-                        <Skeleton className="h-6 w-32 mb-1" />
-                        <Skeleton className="h-4 w-48" />
-                    </div>
-                    <Skeleton className="h-9 w-24 rounded-md" />
-                </div>
-                 <div className="hidden md:block bg-card shadow-sm rounded-lg p-4">
-                    <Skeleton className="h-6 w-20 mb-4" />
-                    <div className="space-y-4">
-                         <div className="grid gap-2">
-                            <Skeleton className="h-4 w-16" />
-                            <Skeleton className="h-10 w-full" />
-                        </div>
-                         <div className="grid gap-2">
-                            <Skeleton className="h-4 w-16" />
-                            <Skeleton className="h-10 w-full" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Skeleton className="h-4 w-12" />
-                                <Skeleton className="h-10 w-full" />
-                            </div>
-                            <div className="grid gap-2">
-                                <Skeleton className="h-4 w-16" />
-                                <Skeleton className="h-10 w-full" />
-                            </div>
-                        </div>
-                         <Skeleton className="h-10 w-full" />
-                    </div>
-                </div>
-                 <div className="md:hidden">
-                    <Skeleton className="h-14 w-full" />
-                </div>
-                <ScrollArea className="flex-1 -mr-6 pr-6">
-                    <div className="space-y-4">
-                        {Array.from({ length: 4 }).map((_, i) => <JobCardSkeleton key={i} />)}
-                    </div>
-                </ScrollArea>
-            </div>
-             <div className={cn("md:col-span-6", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
-                 <JobDetailSkeleton />
-            </div>
-        </div>
-      )
-  }
-
   return (
     <>
     <div className="grid md:grid-cols-10 gap-6 h-full">
@@ -1017,50 +831,89 @@ function JobsContent() {
                     <PostJobDialog onJobPosted={() => {}} />
                 </div>
             </div>
-
-            {/* Filters for Desktop */}
-            <div className="hidden md:block bg-card shadow-sm rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-4 font-headline">Filters</h3>
-                <FilterForm />
-            </div>
-
-            {/* Filters for Mobile */}
-            <div className="md:hidden">
-                <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen} className="bg-card shadow-sm rounded-lg">
-                    <CollapsibleTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-between p-4">
+            <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen} className="border shadow-sm rounded-lg">
+                <div className="p-4">
+                     <CollapsibleTrigger asChild>
+                        <Button variant="ghost" className="w-full justify-between md:hidden">
                             <span>{isFilterOpen ? 'Hide' : 'Show'} Filters</span>
                             <SlidersHorizontal className="h-4 w-4" />
                         </Button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="p-4 pt-0">
-                        <div className="mt-4">
-                            <FilterForm />
+                </div>
+                <CollapsibleContent>
+                    <div className="p-4 pt-0 space-y-4">
+                         <div className="grid gap-2">
+                            <Label htmlFor="location">Location</Label>
+                            <LocationCombobox value={locationFilter} onChange={setLocationFilter} />
                         </div>
-                    </CollapsibleContent>
-                </Collapsible>
-            </div>
-            
+                         <div className="grid gap-2">
+                            <Label htmlFor="category">Category</Label>
+                            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                            <SelectTrigger id="category">
+                                <SelectValue placeholder="All Categories" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="All Categories">All Categories</SelectItem>
+                                {JOB_CATEGORIES.map(category => (
+                                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                                ))}
+                            </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="price">Price</Label>
+                                <Select value={priceFilter} onValueChange={setPriceFilter}>
+                                    <SelectTrigger id="price">
+                                        <SelectValue placeholder="All Prices" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="All Prices">All Prices</SelectItem>
+                                        <SelectItem value="0-100">£0 - £100</SelectItem>
+                                        <SelectItem value="100-500">£100 - £500</SelectItem>
+                                        <SelectItem value="500-1000">£500 - £1000</SelectItem>
+                                        <SelectItem value="1000">£1000+</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                             <div className="grid gap-2">
+                                <Label htmlFor="job-type">Job Type</Label>
+                                <Select value={jobTypeFilter} onValueChange={setJobTypeFilter}>
+                                    <SelectTrigger id="job-type">
+                                        <SelectValue placeholder="All Types" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="All Types">All Types</SelectItem>
+                                        <SelectItem value="Remote">Remote</SelectItem>
+                                        <SelectItem value="On-site">On-site</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <Button variant="ghost" onClick={handleResetFilters} className="w-full text-muted-foreground">
+                            <RotateCcw className="mr-2 h-4 w-4"/>
+                            Reset Filters
+                        </Button>
+                    </div>
+                 </CollapsibleContent>
+            </Collapsible>
              <ScrollArea className="flex-1 -mr-6 pr-6">
                 <div className="space-y-4">
-                    {filteredJobs.length > 0 ? (
+                    {loading ? (
+                         Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)
+                    ) : (
                         filteredJobs.map((job) => (
                             <Card 
                                 key={job.id} 
-                                className={cn(
-                                    "cursor-pointer transition-all border-0",
-                                    selectedJob?.id === job.id 
-                                        ? "shadow-lg shadow-primary/20 -translate-y-1"
-                                        : "hover:shadow-lg hover:shadow-primary/20 hover:-translate-y-1"
-                                )}
+                                className={`cursor-pointer transition-all ${selectedJob?.id === job.id ? 'border-primary' : ''}`}
                                 onClick={() => handleJobSelect(job)}
                             >
-                                <CardHeader className="p-4 pt-4 pb-2">
+                                <CardHeader className="p-3 pt-3 pb-2">
                                     <div className="flex items-start justify-between">
                                         <div>
                                             <div className="flex items-center gap-2 mb-1">
                                                 <CardTitle className="font-headline text-base line-clamp-1">{job.title}</CardTitle>
-                                                <span className={cn("px-1 font-semibold text-xs", getStatusClass(job.status))}>{job.status}</span>
+                                                <Badge variant={'default'} className={cn(getStatusBadgeClass(job.status))}>{job.status}</Badge>
                                             </div>
                                             <CardDescription className="flex items-center gap-2 text-xs">
                                                 <Image src={job.postedBy.avatar} alt={job.postedBy.name} width={20} height={20} className="rounded-full" data-ai-hint="logo" />
@@ -1095,32 +948,25 @@ function JobsContent() {
                                         </DropdownMenu>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-4 pt-0 pb-4">
-                                     <p className="text-sm text-muted-foreground pr-4 mt-1 line-clamp-2">
-                                        {job.description}
-                                    </p>
-                                    <div className="flex justify-between items-end mt-2">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <MapPin className="h-3 w-3" />
-                                            <span>{job.location} ({job.jobType})</span>
-                                        </div>
+                                <CardContent className="p-3 pt-0 pb-3">
+                                    <div className="flex justify-between items-start">
+                                         <p className="text-sm text-muted-foreground pr-4 mt-1">
+                                            {truncateText(job.description, 25)}
+                                        </p>
                                         <div className="text-lg font-bold text-primary whitespace-nowrap">£{job.price.toLocaleString()}</div>
                                     </div>
                                 </CardContent>
                             </Card>
                         ))
-                    ) : (
-                        <div className="text-center text-muted-foreground p-8">
-                            <p>No jobs found.</p>
-                            <p className="text-sm">Try adjusting your filters.</p>
-                        </div>
                     )}
                 </div>
              </ScrollArea>
         </div>
         {/* Right Column */}
         <div className={cn("md:col-span-6", mobileView === 'detail' ? 'block' : 'hidden md:block')}>
-            {selectedJob ? (
+            {loading ? (
+                <Card><CardHeader><Skeleton className="h-full w-full" /></CardHeader></Card>
+            ) : selectedJob ? (
                 <JobDetailView 
                     job={selectedJob} 
                     onBack={() => setMobileView('list')}
@@ -1168,5 +1014,3 @@ export default function JobsPage() {
     </Suspense>
   )
 }
-
-    
